@@ -1,13 +1,13 @@
 import time
 import network
-import config
+import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 from neopixel import NeoPixel
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect(config.essid, config.passwd) # your local wifi credentials
+wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
 
 np = NeoPixel(Pin(15, Pin.OUT), 32) # which pin your NeoPixels are connected to
 
@@ -47,15 +47,16 @@ def set_state(msg):
 
 # topics we recognize with their respective functions
 subtopic = {
-	b'led/color': set_color,
-	b'led/state': set_state,
+	b'led_panel/color': set_color,
+	b'led_panel/state': set_state,
 }
 
-def set_led(topic,msg):
+def handle_msg(topic,msg):
 	global r, g, b
 	print("topic:'", topic, "' msg:'", msg, "'")
 
 	if topic in subtopic:
+		# call the function for the topic, with the message as parameter
 		subtopic[topic](msg)
 	else:
 		print("topic not recognized")
@@ -63,9 +64,9 @@ def set_led(topic,msg):
 
 # start the MQTT client for this microcontroller
 mq = MQTTClient("neo", "192.168.0.23")
-mq.set_callback(set_led) # set_led will be called for ALL messages received
+mq.set_callback(handle_msg) # handle_msg will be called for ALL messages received
 mq.connect()
-mq.subscribe(b"led/#") # specify the topic to subscribe to (led in this case)
+mq.subscribe(b"led_panel/#") # specify the topic to subscribe to (led in this case)
 
 # wait for messages forever
 # when one is received the function we passed to set_callback() will be run

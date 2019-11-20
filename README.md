@@ -95,7 +95,7 @@ To see your board's ip address:
 ('192.168.0.38', '255.255.255.0', '192.168.0.1', '192.168.0.1')
 ```
 
-It's the first address.
+It's the first address.  Remember this, you'll use it in a bit.
 
 ### Enabling webrepl
 
@@ -129,15 +129,18 @@ Valid values for `duty()` are 0 to 1023.
 
 ### Using webrepl
 
-Use tab to find the right one:
+#### Setup
+
+To view webrepl in your browser go to [http://micropython.trmm.net/](http://micropython.trmm.net/).  **Note:** make sure your browser doesn't correct it to be `https`.  You'll want to use the `http` site or it won't work.  If you run the HTTPS Everywhere extension, disable it for this page.
+
+Replace the IP address in the text box with the one for your ESP board.  If you forgot the IP address, you can run screen again in a terminal, then:
 
 ```
-geode ~  screen /dev/tty.
-tty.AVSamsungSoundbarK450K-  tty.SLAB_USBtoUART
-tty.Bluetooth-Incoming-Port  tty.SOC
-tty.MALS                     tty.usbserial-00FEAED4
-geode ~  screen /dev/tty.SLAB_USBtoUART 115200
+>>> import network
+>>> wlan = network.WLAN(network.STA_IF)
+>>> wlan.ifconfig()
 ```
+
 
 Quit with `ctrl-a` `ctrl-\`
 
@@ -145,23 +148,26 @@ To paste a bunch of code at the prompt do `ctrl-e`.
 
 `ctrl-c` will quit the `while(true)` loop.
 
-OR
+#### Workflow
 
-use "send file" button to send, but then you must do
+To put code on your board you use the "Send a file" area to send your `.py` files to the board.  You're not limited to one file, you can send several.  If you want one to be the code that gets run automatically whenever the board boots, name it `main.py`.  Other files you send will not overwrite your `main.py` file.
 
-import led
+Once you have sent the file to the board to run it you have to import it.  So if I just sent led.py, I type:
 
-(or whatever filename) to run it
+```
+>>> import led
+```
 
-if you name it `main.py` it will run it when the micro boots.
-
-`randomname.py` will not overwrite `main.py` on the board, so if it gets unplugged, it when it's plugged in again it will run `main.py`
+Oh no!  You have a bug!  You'll need to delete that module before you send and import your fix (sorry).  You use the `sys` module for this:
 
 ```python
-import sys
-del sys.modules['module_to_delete']
-del sys.modules['pattern']
+>>> import sys
+>>> del sys.modules['led']
 ```
+
+Now send the debugged file and import again.  (You only need to import `sys` once.)
+
+Lather, rinse, repeat.
 
 ### Troubleshooting
 
@@ -194,6 +200,18 @@ this can be changed).
 ## Resources
 
 "How Consumer IoT Devices Expose Information" [https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information](https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information)
+
+Hackaday talk about cloudless IoT [https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/](https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/)
+
+Candle, privacy-friendly smarthome [https://www.candlesmarthome.com/](https://www.candlesmarthome.com/)
+
+Snips, private-by-design voice assistant [https://snips.ai/](https://snips.ai/)
+
+MQTT [https://mqtt.org/](https://mqtt.org/)
+
+Node Red, "low code" programming for networked things [https://nodered.org/](https://nodered.org/)
+
+Cloning a Raspberry Pi [https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image](https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image)
 
 Adafruit ESP8266 Feather Huzzah pinout and guide:
 [https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts/](https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts/)

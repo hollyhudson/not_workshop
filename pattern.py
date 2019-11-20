@@ -1,6 +1,6 @@
 import time
 import network
-import config
+import secrets
 import urandom
 from umqtt.simple import MQTTClient
 from machine import Pin
@@ -8,7 +8,7 @@ from neopixel import NeoPixel
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect(config.essid, config.passwd) # your local wifi credentials
+wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
 
 NUM_PIXELS = 32
 np = NeoPixel(Pin(15, Pin.OUT), NUM_PIXELS) 
@@ -113,11 +113,11 @@ subtopic = {
 	b'led/disco': set_disco,
 }
 
-def set_led(topic,msg):
-	global r, g, b
+def handle_msg(topic,msg):
 	print("topic:'", topic, "' msg:'", msg, "'")
 
 	if topic in subtopic:
+		# call function associated with topic, passing message as parameter
 		subtopic[topic](msg)
 	else:
 		print("topic not recognized")
@@ -125,7 +125,7 @@ def set_led(topic,msg):
 
 # start the MQTT client for this microcontroller
 mq = MQTTClient("neo", "192.168.0.23")
-mq.set_callback(set_led) # set_led will be called for ALL messages received
+mq.set_callback(handle_msg) # handle_msg will be called for ALL messages received
 mq.connect()
 mq.subscribe(b"led/#") # specify the topic to subscribe to (led in this case)
 
