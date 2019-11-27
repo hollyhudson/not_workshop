@@ -18,14 +18,85 @@
 **SNoT**
 	Secure Network of Things
 
-## Setting up an ESP board
+## MQTT
+
+### Installation
+
+For MQTT you'll need a broker to act as the main switchboard for all your messages, and a client running on each of your devices.  For testing purposes it's good to install both a broker and client module on whatever computer you're running the broker on.  You can do this with whatever package manager you use, here are some examples:
+
+Linux/Debian/Ubuntu:
+```bash
+> sudo apt install mosquitto mosquitto-clients
+```
+
+MacOS:
+```bash
+> sudo port install mosquitto mosquitto-clients
+```
+
+or
+
+```bash
+> brew install mosquitto mosquitto-clients
+```
+
+### Commands
+
+To start a broker (in verbose mode):
+
+```bash
+> mosquitto -v
+```
+
+The basic format for subscribing to a topic, and for publishing a message to that topic:
+
+```bash
+> mosquitto_sub -h [host ip] -t [topic]
+> mosquitto_pub -h [host ip] -t [topic] -m [message]
+```
+
+example:
+
+```bash
+> mosquitto_sub -h 129.168.0.23 -t led 
+> mosquitto_pub -h 129.168.0.23 -t led -m 255,0,255
+```
+
+You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You cannot use wildcards to publish to more than one topic.
+
+**living_room/#**
+	all topics for all devices in your living room
+
+**living_room/+/bulb**
+	all the lightbulbs in your living room
+
+
+## Things on ESP boards
 
 ### Flashing micropython onto the board
 
-http://micropython.org/download
+First, let's erase whatever is on the ESP board, and flash it with MicroPython.  We'll use esptool for both steps, which you can install with `pip` with one of the following (or however else you like to do python package management):
 
+```bash
+> pip install esptool.py
+> pip3 install esptool.py
 ```
-geode❀ ~🐟  esptool.py --port /dev/tty.SLAB_USBtoUART erase_flash
+
+The code you'll want to flash can be found at [http://micropython.org/download](http://micropython.org/download).  
+
+You have to specify which USB port your board is on, and you can find that by typing `[tab]` after `/dev/tty.` to see what the possibilities are:
+
+```bash
+> esptool.py --port /dev/tty.
+tty.AVSamsungSoundbarK450K-  tty.SLAB_USBtoUART
+tty.Bluetooth-Incoming-Port  tty.SOC
+tty.MALS                     tty.usbserial-00FEB022
+```
+
+That `SLAB_USBtoUART` one is the one we want. First erase:
+
+```bash
+> esptool.py --port /dev/tty.SLAB_USBtoUART erase_flash
 esptool.py v2.8
 Serial port /dev/tty.SLAB_USBtoUART
 Connecting........_
@@ -42,7 +113,12 @@ Stub running...
 Erasing flash (this may take a while)...
 Chip erase completed successfully in 9.1s
 Hard resetting via RTS pin...
-geode❀ ~🐟  esptool.py --port /dev/tty.SLAB_USBtoUART --baud 460800 write_flash --flash_size=detect 0 Desktop/esp8266-20190529-v1.11.bin
+```
+
+Then flash:
+
+```bash
+> esptool.py --port /dev/tty.SLAB_USBtoUART --baud 460800 write_flash --flash_size=detect 0 Desktop/esp8266-20190529-v1.11.bin
 esptool.py v2.8
 Serial port /dev/tty.SLAB_USBtoUART
 Connecting........_
@@ -65,13 +141,12 @@ Hash of data verified.
 
 Leaving...
 Hard resetting via RTS pin...
-geode❀ ~🐟  screen /dev/tty.
-tty.AVSamsungSoundbarK450K-  tty.SLAB_USBtoUART
-tty.Bluetooth-Incoming-Port  tty.SOC
-tty.MALS                     tty.usbserial-00FEB022
-geode❀ ~🐟  screen /dev/tty.SLAB_USBtoUART
-[screen is terminating]
-geode❀ ~🐟  screen /dev/tty.SLAB_USBtoUART 115200
+```
+
+Finally, run `screen`, which will let us interact directly with the serial (USB) port so that we can get an interactive python prompt from our python installation on the board:
+
+```bash
+> screen /dev/tty.SLAB_USBtoUART 115200
 ```
 
 Hit `enter` to get a prompt.
@@ -80,12 +155,12 @@ Hit `ctrl-D` to reset it, which will display the version of micropython that's f
 
 In screen, put the board on your local network by:
 
-```
+```python
 >>> import network
 >>> wlan = network.WLAN(network.STA_IF)
 >>> wlan.active(True)
 #8 ets_task(4020f4d8, 28, 3fff9e28, 10)
->>> wlan.connect("your_wifi", "password") # your local wifi credentials
+>>> wlan.connect("your_wifi", "password") # your local wifi credentials go here
 ```
 
 To see your board's ip address:
@@ -95,11 +170,11 @@ To see your board's ip address:
 ('192.168.0.38', '255.255.255.0', '192.168.0.1', '192.168.0.1')
 ```
 
-It's the first address.  Remember this, you'll use it in a bit.
+It's the first address.  **Remember this**, you'll use it in a bit.
 
 ### Enabling webrepl
 
-```
+```python
 >>> import webrepl_setup
 WebREPL daemon auto-start status: disabled
 
@@ -115,17 +190,12 @@ Would you like to reboot now? (y/n)
 
 Confirm everything is working by lighting up an LED:
 
-```
+```python
 >>> from machine import Pin                                                
 >>> p = Pin(14,Pin.OUT)                                                      
 >>> p.on()                                                                     
 >>> p.off()                                                                    
->>> from machine import PWM                                                    
->>> pwm = PWM(p)                                                             
->>> pwm.duty(100)                                                              
 ```
-
-Valid values for `duty()` are 0 to 1023.
 
 ### Using webrepl
 
@@ -133,32 +203,27 @@ Valid values for `duty()` are 0 to 1023.
 
 To view webrepl in your browser go to [http://micropython.trmm.net/](http://micropython.trmm.net/).  **Note:** make sure your browser doesn't correct it to be `https`.  You'll want to use the `http` site or it won't work.  If you run the HTTPS Everywhere extension, disable it for this page.
 
-Replace the IP address in the text box with the one for your ESP board.  If you forgot the IP address, you can run screen again in a terminal, then:
+Replace the IP address in the text box with the one for your ESP board, and hit `Connect`.  If you forgot the IP address, you can run screen again in a terminal, then:
 
-```
+```python
 >>> import network
 >>> wlan = network.WLAN(network.STA_IF)
 >>> wlan.ifconfig()
 ```
 
+You'll see at the bottom it says use `ctrl-A` and `ctrl-V` to paste.  If you want to paste multiple lines of code use `ctrl-E` instead (or upload it as a file).  To quit use `ctrl-a` `ctrl-\`.
 
-Quit with `ctrl-a` `ctrl-\`
-
-To paste a bunch of code at the prompt do `ctrl-e`.
-
-`ctrl-c` will quit the `while(true)` loop.
+If end up with no prompt because code is running, hit `ctrl-C` to quit the `while(true)` loop.
 
 #### Workflow
 
-To put code on your board you use the "Send a file" area to send your `.py` files to the board.  You're not limited to one file, you can send several.  If you want one to be the code that gets run automatically whenever the board boots, name it `main.py`.  Other files you send will not overwrite your `main.py` file.
+We want to be able to write, run, debug, write, run, debug... etc.
 
-Once you have sent the file to the board to run it you have to import it.  So if I just sent led.py, I type:
+You can write your code on your laptop, then push the file to the board using the "Send a file" area.  To then run the code, type `import [filename without the .py part]`.  So if my file is `led.py`, I want to type `import led`.
 
-```
->>> import led
-```
+You're not limited to one file, you can have several on the board at once.  If you want one to be the code that gets run automatically whenever the board boots, name it `main.py` and run `import main`.  
 
-Oh no!  You have a bug!  You'll need to delete that module before you send and import your fix (sorry).  You use the `sys` module for this:
+When you want to resend the file after debugging, you will have to delete the module first (sorry).  You'll need to import `sys` for this:
 
 ```python
 >>> import sys
@@ -167,26 +232,15 @@ Oh no!  You have a bug!  You'll need to delete that module before you send and i
 
 Now send the debugged file and import again.  (You only need to import `sys` once.)
 
-Lather, rinse, repeat.
+Now we can write, run, and debug over and over again.
 
-### Troubleshooting
+You can also run small snippets of code directly from the python prompt to test things out if you want.
+
+## Troubleshooting
 
 **Can't connect to micropython.org/webrepl**
 
 Try the `http` site and _not_ the `https` site.  If you try to access from the `https` site browsers may refuse to serve the "insecure content" from the websocket.
-
-## MQTT
-
-```bash
-> mosquitto_pub -h [host ip] -t [topic] -m [message]
-> mosquitto_pub -h 129.168.0.23 -t led -m 5
-```
-
-**microA/#**
-	all topics for that microcontroller
-
-**microA/+/led**
-	all led topics for that microcontroller
 
 ## To Do
 
@@ -196,6 +250,93 @@ The broker will hold the last message sent, and if you run
 `mq.wait_msg()` the board will listen for a message again and get
 whatever was sent in the interim (with the current qos configuration,
 this can be changed).
+
+## Setting up a Raspberry Pi
+
+### Basic Setup
+
+These instructions are for a headless (no monitor) Raspberry Pi W0.
+
+Raspberry Pi's keep their operating system on an SD card, so the first thing we have to do is flash a card with the appropriate operating system.
+
+First download the "lite" version of the most recent Raspbian version here: [https://www.raspberrypi.org/downloads/raspbian/](https://www.raspberrypi.org/downloads/raspbian/)
+
+We'll use Etcher for flashing the OS onto the Pi, so download and install it: [https://www.balena.io/etcher/](https://www.balena.io/etcher/)
+
+(So, I guess if you're running Catalina find a friend with Linux to flash your SD card because that seems to be broken in Catalina right now?)
+
+Now, we'll need to get the wifi credentials onto the board since we're not connecting it to a monitor.  Instructions for that are here: [https://www.raspberrypi.org/documentation/configuration/wireless/headless.md](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md)
+
+Now you need to find the ip address of your Raspberry Pi.  `nmap` is good for this. 
+
+[...some steps skipped...]
+
+Having just set up your pi, it's in a bit of a dangerous state since remote login is enabled and the default username and password are `pi` and `raspberry`.  Log in and create a .ssh directory in pi's home directory:
+
+```
+holly@geode:~ > ssh pi@192.168.0.39
+pi@raspberrypi:~ $ mkdir .ssh
+```
+
+From your local machine, transfer your public ssh key to the pi:
+
+```
+holly@geode:~/.ssh >  scp id_rsa.pub pi@192.168.0.39:/home/pi/.ssh/authorized_keys
+pi@192.168.0.39's password:
+id_rsa.pub                                    100%  399    71.6KB/s   00:00
+```
+
+Now, before you turn off password login, make sure you can successfully log into the pi.  So exit, and ssh back in.
+
+```
+pi@raspberrypi:~/.ssh $ exit
+logout
+Connection to 192.168.0.39 closed.
+holly@geode:~ >  ssh pi@192.168.0.39
+Enter passphrase for key '/Users/holly/.ssh/id_rsa':
+Linux raspberrypi 4.19.75+ #1270 Tue Sep 24 18:38:54 BST 2019 armv6l
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sat Nov 23 15:09:38 2019 from 192.168.0.10
+
+SSH is enabled and the default password for the 'pi' user has not been changed.
+This is a security risk - please login as the 'pi' user and type 'passwd' to set a new password.
+
+pi@raspberrypi:~ $
+```
+
+and turn off password login by editing `/etc/ssh/sshd_config`, searching for the line `#PasswordAuthentication yes` and changing the yes to no and uncomment the line (remove the `#`).
+
+To make the changes take effect, restart `ssh` with:
+
+```
+pi@raspberrypi:~ $ sudo /etc/init.d/ssh restart
+[ ok ] Restarting ssh (via systemctl): ssh.service.
+```
+
+or just reboot the pi.
+
+You'll probably want to change the hostname of your pi.  Edit two files, `/etc/hosts` and `/etc/hostname`, replacing all instance of "raspberrypi" with whatever you want the hostname to be, then reboot the pi (`sudo reboot`).
+
+Now let's get the os up to date:
+
+```
+pi@raspberrypi:~ $ sudo apt update
+pi@raspberrypi:~ $ sudo apt upgrade
+```
+
+### Installing MQTT
+
+```
+pi@raspberrypi:~ $ sudo apt install mosquitto mosquitto-clients
+```
+
+
 
 ## Resources
 
