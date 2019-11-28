@@ -10,8 +10,10 @@ wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
 
-NUM_PIXELS = 32
+NUM_PIXELS = 24
+# NeoPixel(Pin([pin number], Pin.OUT), [number of pixel])
 np = NeoPixel(Pin(15, Pin.OUT), NUM_PIXELS) 
+onboard_led = Pin(0, Pin.OUT)
 
 # red, green, and blue values for the leds
 r, g, b = 0, 0, 0
@@ -28,12 +30,14 @@ def random(low,high):
 
 # keep trying to connect to the wifi until we suceed
 while not wlan.isconnected():
-	np.fill((10,0,0))
-	np.write()
-	time.sleep_ms(200)
-	np.fill((0,0,0))
-	np.write()
-	time.sleep_ms(300)
+        np.fill((10,0,0))
+        np.write()
+        time.sleep_ms(200)
+        np.fill((0,0,0))
+        np.write()
+        time.sleep_ms(300)
+np.fill((0,0,10))
+np.write()
 
 wlan.ifconfig()
 
@@ -115,22 +119,25 @@ subtopic = {
 
 def handle_msg(topic,msg):
 	print("topic:'", topic, "' msg:'", msg, "'")
-
+	
 	if topic in subtopic:
 		# call function associated with topic, passing message as parameter
-		subtopic[topic](msg)
+		subtopic[topic](msg)	
 	else:
 		print("topic not recognized")
 
 # start the MQTT client for this microcontroller
-mq = MQTTClient("neo", "192.168.0.23")
+mq = MQTTClient("neo", "192.168.0.10")
 mq.set_callback(handle_msg) # handle_msg is called for ALL messages received
 mq.connect()
 mq.subscribe(b"led/#") # specify the topic to subscribe to (led in this case)
 
 # wait for messages forever
 # when one is received the function we passed to set_callback() will be run
+other_counter = 0
 while True:
 	if discoing == True:
 		disco_pattern()
 	mq.check_msg()
+
+

@@ -1,15 +1,17 @@
 import time
 import network
-import config
+import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 from neopixel import NeoPixel
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect(config.essid, config.passwd) # your local wifi credentials
+wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
 
-np = NeoPixel(Pin(15, Pin.OUT), 32) # which pin your NeoPixels are connected to
+NUM_PIXELS = 32
+# NeoPixel(Pin([pin number], Pin.OUT), [number of pixel])
+np = NeoPixel(Pin(15, Pin.OUT), NUM_PIXELS) 
 
 # keep trying to connect to the wifi until we suceed
 while not wlan.isconnected():

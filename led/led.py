@@ -38,8 +38,8 @@ def handle_msg(topic,msg):
 		print("topic not recognized")
 
 # start the MQTT client for this microcontroller
-mq = MQTTClient("neo", "192.168.0.23")
-mq.set_callback(handle_msg) # set_led will be called for ALL messages received
+mq = MQTTClient("neo", "192.168.0.10")
+mq.set_callback(handle_msg) # handle_msg is called for ALL messages received
 mq.connect()
 mq.subscribe(b"green_led/#") # specify the topic to subscribe to (led in this case)
 

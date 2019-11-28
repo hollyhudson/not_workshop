@@ -336,6 +336,20 @@ pi@raspberrypi:~ $ sudo apt upgrade
 pi@raspberrypi:~ $ sudo apt install mosquitto mosquitto-clients
 ```
 
+## Best Practices
+
+### Circuits
+
+**Unplug** your microcontroller before you change the wiring.
+
+**Black wire** for ground.
+
+**Red wire** for power.
+
+Connect in this order:
+	1. ground
+	1. power
+	1. data
 
 
 ## Resources
@@ -353,6 +367,8 @@ MQTT [https://mqtt.org/](https://mqtt.org/)
 Node Red, "low code" programming for networked things [https://nodered.org/](https://nodered.org/)
 
 Cloning a Raspberry Pi [https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image](https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image)
+
+Adafruit NeoPixel Uberguide [https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels)
 
 Adafruit ESP8266 Feather Huzzah pinout and guide:
 [https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts/](https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts/)
