@@ -75,7 +75,8 @@ def handle_msg(topic,msg):
 
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
-mq = MQTTClient("neo", "192.168.0.23")
+# (client_id, client_ip_address), client_id must be unique
+mq = MQTTClient("neo_button", "192.168.0.23")
 mq.set_callback(handle_msg) # handle_msg() will be called for ALL messages received
 mq.connect()
 mq.subscribe(b"led_panel/#")
@@ -84,3 +85,32 @@ mq.subscribe(b"led_panel/#")
 # when one is received the function we passed to set_callback() will be run
 while True:
 	mq.check_msg()
+
+######### Publishing an MQTT message ########################
+
+# Code involving publishing must come after the client is declared
+
+last_button_value = True # not pressed
+led_on = False # is the LED on?
+
+while True:
+	button_value = button.value()
+
+	if last_button_value == button_value:
+		continue
+
+	last_button_value = button_value
+
+	if button_value:
+		# button was released/unpressed
+		print("button was released")
+		continue
+
+	led_on = not led_on
+	print("pressed!!!!!")
+	if led_on:
+		mq.publish(topic="my_led/state", msg="on")
+	else:
+		mq.publish(topic="my_led/state", msg="off")
+
+	time.sleep(0.1)

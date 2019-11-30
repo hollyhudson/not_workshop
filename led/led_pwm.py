@@ -2,11 +2,12 @@ import time
 import network
 import secrets
 from umqtt.simple import MQTTClient
-from machine import Pin
+from machine import Pin,PWM
 
 ########### global variables ##############################
 
 my_led = Pin(14, Pin.OUT) # which pin your LED is connected to
+my_led_pwm = PWM(my_led)
 
 ########### get on the network ############################
 
@@ -25,9 +26,9 @@ wlan.ifconfig()
 
 def set_state(msg):
 	if msg == b'on':
-		my_led.on() 
+		my_led_pwm.duty(500) # 0-1023, 512 is 50% brightness
 	elif msg == b'off':
-		my_led.off() 
+		my_led_pwm.duty(0) 
 
 ################ MQTT Message switchboard #############################
 
@@ -49,7 +50,7 @@ def handle_msg(topic,msg):
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
 # start the MQTT client for this microcontroller
-mq = MQTTClient("led", "192.168.0.10")
+mq = MQTTClient("neo", "192.168.0.10")
 mq.set_callback(handle_msg) # handle_msg() is called for ALL messages received
 mq.connect()
 mq.subscribe(b"my_led/#") 

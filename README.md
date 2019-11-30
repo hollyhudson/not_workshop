@@ -153,6 +153,8 @@ Hit `enter` to get a prompt.
 
 Hit `ctrl-D` to reset it, which will display the version of micropython that's flashed to the board.
 
+To quit type `ctrl-A` `ctrl-\`.
+
 In screen, put the board on your local network by:
 
 ```python
