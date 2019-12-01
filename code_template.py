@@ -3,12 +3,9 @@ import network
 import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
-from neopixel import NeoPixel
 
 ########### global variables ##############################
 
-np = NeoPixel(Pin(15, Pin.OUT), 32) # which pin your NeoPixels are connected to
-r, g, b = 0, 0, 0 # starting red, green, and blue values for the leds
 on = False # is the led on?
 
 ########### get on the network ############################
@@ -20,12 +17,7 @@ wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
 ########## while waiting to connect to the network ###############
 
 while not wlan.isconnected():
-	np.fill((10,0,0))
-	np.write()
-	time.sleep_ms(200)
-	np.fill((0,0,0))
-	np.write()
-	time.sleep_ms(300)
+	time.sleep_ms(500)
 
 wlan.ifconfig()
 
