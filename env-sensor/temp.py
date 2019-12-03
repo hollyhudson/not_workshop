@@ -42,4 +42,5 @@ while True:
 	mq.publish(topic="env_sensor/temp", msg=temp)
 	mq.publish(topic="env_sensor/humidity", msg=humidity)
 
+	# publish once/sec
 	time.sleep_ms(1000)

@@ -1,4 +1,4 @@
-## Names
+# Names
 
 **CIot**
 	Cloudless Internet of Things (?)
@@ -70,6 +70,9 @@ You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You 
 **living_room/+/bulb**
 	all the lightbulbs in your living room
 
+### Configuration
+
+By default the mosquitto broker runs on port 1883.
 
 ## Things on ESP boards
 
@@ -190,7 +193,9 @@ Changes will be activated after reboot
 Would you like to reboot now? (y/n)
 ```
 
-Confirm everything is working by lighting up an LED:
+### Is it working?
+
+If you have an ESP with an onboard LED, you can confirm everything is working by lighting up an LED:
 
 ```python
 >>> from machine import Pin                                                
@@ -198,6 +203,34 @@ Confirm everything is working by lighting up an LED:
 >>> p.on()                                                                     
 >>> p.off()                                                                    
 ```
+
+If you have one with an OLED screen, import the libraries and instantiate an object:
+
+```python
+>>> import ssd1306 from machine
+>>> i2c = machine.I2C(-1, machine.Pin(5), machine.Pin(4))
+>>> oled = ssd1306.SSD1306_I2C(128, 32, i2c)
+```
+
+And here's how you use it:
+
+```python
+>>> oled.fill(1) # fill the screen with white (actually blue)
+>>> oled.fill(0) # fill the screen with black
+>>> oled.text("hello",0,0,1) # ("text", x, y, black/white)
+>>> oled.show() # actually display now
+```
+
+You can always find more info with `dir()` and `help()`:
+
+```python
+dir(oled)
+help(oled)
+```
+
+But for full documentation check out the micropython documentation pages.
+
+Documentation for the oled screen is here: [https://docs.micropython.org/en/latest/library/framebuf.html](https://docs.micropython.org/en/latest/library/framebuf.html)
 
 ### Using webrepl
 
@@ -237,6 +270,81 @@ Now send the debugged file and import again.  (You only need to import `sys` onc
 Now we can write, run, and debug over and over again.
 
 You can also run small snippets of code directly from the python prompt to test things out if you want.
+
+## Node Red
+
+### Installation
+
+If you don't already have node.js installed, get it here: [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
+
+Next, install Node Red: [https://nodered.org/docs/getting-started/local](https://nodered.org/docs/getting-started/local)
+
+Once it is done installing, if you click "Running" in the side bar there's detailed information on how to use it.
+
+When you run `node-red` it will provide you with some useful information:
+
+```bash
+2 Dec 17:44:35 - [info] Settings file  : /Users/holly/.node-red/settings.js
+2 Dec 17:44:35 - [info] Context store  : 'default' [module=memory]
+2 Dec 17:44:35 - [info] User directory : /Users/holly/.node-red
+2 Dec 17:44:35 - [warn] Projects disabled : editorTheme.projects.enabled=false
+2 Dec 17:44:35 - [info] Flows file     : /Users/holly/.node-red/flows_geode.json
+2 Dec 17:44:35 - [info] Server now running at http://127.0.0.1:1880/
+```
+
+Note that node red runs on port 1880 by default (MQTT runs on port 1883).
+
+### Node Editor
+
+For a basic interaction, find a "slider" node and plug it into a "debug" node.  You might have to install the dashboard module first:
+
+Hamburger menu --> Manage Palette --> install node-red-dashboard
+
+View the dashboard by going to the url of your palette with a `/ui` added to the end (or click the dashboard icon in the node editor).
+
+**In order for changes you made in the node editor to take effect, you have to click "Deploy".**  You will be clicking "Deploy" a lot.
+
+Node Red's basic function is to send messages from one thing to another.  While these messages can enter Node Red in any number of formats (http, mqtt, html, xml, etc.) once inside Node Red they are converted to and passed around as json objects.  Here is the basic structure:
+
+```javascript
+{
+	"key": "value",
+	"key": "value"
+}
+```
+
+When you open a node containing code, by default the message object will be called `msg`, and the actual message being passed will be in the "payload" property:
+
+```javascript
+msg = {
+	"payload": "on"
+}
+```
+
+Above is a common example where you want to pass the string "on" to a device to, for example, turn on a lightbulb.
+
+The payload can be a string, as above, a number (don't use quotes), a boolean (true or false), an array:
+
+```javascript
+msg = {
+	"payload": ["red","blue","green"]
+}
+```
+
+or it can be an object:
+
+```javascript
+msg = {
+	"payload": {
+		"bulb1": "on",
+		"bulb2": "off"
+	}	
+}
+```
+
+### APIs
+
+![images/astro-api-response.png](images/astro-api-response.png)
 
 ## Troubleshooting
 
