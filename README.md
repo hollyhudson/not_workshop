@@ -1,3 +1,34 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Names](#names)
+- [MQTT](#mqtt)
+  - [Installation](#installation)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
+- [Things on ESP boards](#things-on-esp-boards)
+  - [Flashing micropython onto the board](#flashing-micropython-onto-the-board)
+  - [Enabling webrepl](#enabling-webrepl)
+  - [Is it working?](#is-it-working)
+  - [Using webrepl](#using-webrepl)
+    - [Setup](#setup)
+    - [Workflow](#workflow)
+- [Node Red](#node-red)
+  - [Installation](#installation-1)
+  - [Node Editor](#node-editor)
+  - [APIs](#apis)
+- [Troubleshooting](#troubleshooting)
+- [To Do](#to-do)
+  - [Document the QOS settings for mqtt](#document-the-qos-settings-for-mqtt)
+- [Setting up a Raspberry Pi](#setting-up-a-raspberry-pi)
+  - [Basic Setup](#basic-setup)
+- [Best Practices](#best-practices)
+  - [Circuits](#circuits)
+- [Resources](#resources)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Names
 
 **CIot**
