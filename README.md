@@ -51,6 +51,22 @@
 
 # MQTT
 
+MQTT is a simple, lightweight messaging protocol.  Clients can both publish to and subscribe to topics.  If I publish to a topic called "talk", everyone who is subscribed to that topic will get the message.  Topics can be anything, and they are hierarchical.  So I can have, for instance:
+
+```
+house/kitchen/lights/overhead
+house/kitchen/lights/sink
+house/kitchen/lights/under_counter
+house/kitchen/sensors/temp
+house/kitchen/sensors/humidity
+```
+
+Using this example, I could turn on the overhead light in the kitchen by publishing the message `on` to `house/kitchen/lights/overhead`, and I could subscribe to receive messsages from all the sensors in the kitchen by subscribing to `house/kitchen/sensors/#`.  (The `#` here is a wildcard.)
+
+This is a convenient protocol because of its simplicity.  It has far less overhead than http, it's an open standard so it can be freely used and integrated into projects, and there are libraries for several languages (python, javascript, C/C++).
+
+To use MQTT you need to have one device act as a broker that receives all published messages and sends them out to subscribers.  For an IoT setup you'll probably want this to be a machine that stays on all the time, like a Raspberry Pi.  The most popular broker is Mosquitto.  It's free and open source, and runs on Linux, MacOs, and Windows.
+
 ## Installation
 
 For MQTT you'll need a broker to act as the main switchboard for all your messages, and a client running on each of your devices.  For testing purposes it's good to install both a broker and client module on whatever computer you're running the broker on.  You can do this with whatever package manager you use, here are some examples:
@@ -70,6 +86,8 @@ or
 ```bash
 > brew install mosquitto mosquitto-clients
 ```
+
+Here's the Mosquitto website: [https://mosquitto.org/](https://mosquitto.org/), if you want to download it directly or build it from source.
 
 ## Commands
 
@@ -103,7 +121,17 @@ You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You 
 
 ## Configuration
 
-By default the mosquitto broker runs on port 1883.
+Where to find `mosquitto.conf`:
+
+* MacOS - `/usr/local/etc/mosquitto`
+* Linux - `/etc/mosquitto`
+* Windows - `c:\mosquitto\`
+
+By default the mosquitto broker runs on port 1883, unless you intentionally start it on another port: `mosquitto -p 1884`, for instance.
+
+MQTT messages are sent in plaintext.  If you want to encrypt them you have to use SSL.  But there are some other things you can do that are fairly simple to provide some security.
+
+You can restrict who can publish and subscribe to messages by setting client ID restrictions on your broker.
 
 # Things on ESP boards
 
@@ -238,7 +266,8 @@ If you have an ESP with an onboard LED, you can confirm everything is working by
 If you have one with an OLED screen, import the libraries and instantiate an object:
 
 ```python
->>> import ssd1306 from machine
+>>> import machine
+>>> import ssd1306
 >>> i2c = machine.I2C(-1, machine.Pin(5), machine.Pin(4))
 >>> oled = ssd1306.SSD1306_I2C(128, 32, i2c)
 ```
@@ -250,6 +279,8 @@ And here are some basic commands:
 >>> oled.fill(0) # fill the screen with black
 >>> oled.text("hello",0,0,1) # ("text", x, y, black/white)
 >>> oled.show() # actually display now
+>>> oled.invert() # invert colors
+>>> oled.pixel(x, y, c) # address one pixel
 ```
 
 Full documentation for the OLED screen is here: [https://docs.micropython.org/en/latest/library/framebuf.html](https://docs.micropython.org/en/latest/library/framebuf.html)
