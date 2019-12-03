@@ -18,9 +18,9 @@
 **SNoT**
 	Secure Network of Things
 
-## MQTT
+# MQTT
 
-### Installation
+## Installation
 
 For MQTT you'll need a broker to act as the main switchboard for all your messages, and a client running on each of your devices.  For testing purposes it's good to install both a broker and client module on whatever computer you're running the broker on.  You can do this with whatever package manager you use, here are some examples:
 
@@ -40,7 +40,7 @@ or
 > brew install mosquitto mosquitto-clients
 ```
 
-### Commands
+## Commands
 
 To start a broker (in verbose mode):
 
@@ -70,13 +70,13 @@ You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You 
 **living_room/+/bulb**
 	all the lightbulbs in your living room
 
-### Configuration
+## Configuration
 
 By default the mosquitto broker runs on port 1883.
 
-## Things on ESP boards
+# Things on ESP boards
 
-### Flashing micropython onto the board
+## Flashing micropython onto the board
 
 First, let's erase whatever is on the ESP board, and flash it with MicroPython.  We'll use esptool for both steps, which you can install with `pip` with one of the following (or however else you like to do python package management):
 
@@ -177,7 +177,7 @@ To see your board's ip address:
 
 It's the first address.  **Remember this**, you'll use it in a bit.
 
-### Enabling webrepl
+## Enabling webrepl
 
 ```python
 >>> import webrepl_setup
@@ -193,7 +193,7 @@ Changes will be activated after reboot
 Would you like to reboot now? (y/n)
 ```
 
-### Is it working?
+## Is it working?
 
 If you have an ESP with an onboard LED, you can confirm everything is working by lighting up an LED:
 
@@ -212,7 +212,7 @@ If you have one with an OLED screen, import the libraries and instantiate an obj
 >>> oled = ssd1306.SSD1306_I2C(128, 32, i2c)
 ```
 
-And here's how you use it:
+And here are some basic commands:
 
 ```python
 >>> oled.fill(1) # fill the screen with white (actually blue)
@@ -221,6 +221,8 @@ And here's how you use it:
 >>> oled.show() # actually display now
 ```
 
+Full documentation for the OLED screen is here: [https://docs.micropython.org/en/latest/library/framebuf.html](https://docs.micropython.org/en/latest/library/framebuf.html)
+
 You can always find more info with `dir()` and `help()`:
 
 ```python
@@ -228,13 +230,11 @@ dir(oled)
 help(oled)
 ```
 
-But for full documentation check out the micropython documentation pages.
+But for full documentation you'll want to check out the micropython documentation pages online: [http://docs.micropython.org/en/latest/](http://docs.micropython.org/en/latest/)
 
-Documentation for the oled screen is here: [https://docs.micropython.org/en/latest/library/framebuf.html](https://docs.micropython.org/en/latest/library/framebuf.html)
+## Using webrepl
 
-### Using webrepl
-
-#### Setup
+### Setup
 
 To view webrepl in your browser go to [http://micropython.trmm.net/](http://micropython.trmm.net/).  **Note:** make sure your browser doesn't correct it to be `https`.  You'll want to use the `http` site or it won't work.  If you run the HTTPS Everywhere extension, disable it for this page.
 
@@ -250,7 +250,7 @@ You'll see at the bottom it says use `ctrl-A` and `ctrl-V` to paste.  If you wan
 
 If end up with no prompt because code is running, hit `ctrl-C` to quit the `while(true)` loop.
 
-#### Workflow
+### Workflow
 
 We want to be able to write, run, debug, write, run, debug... etc.
 
@@ -271,9 +271,9 @@ Now we can write, run, and debug over and over again.
 
 You can also run small snippets of code directly from the python prompt to test things out if you want.
 
-## Node Red
+# Node Red
 
-### Installation
+## Installation
 
 If you don't already have node.js installed, get it here: [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
 
@@ -294,7 +294,7 @@ When you run `node-red` it will provide you with some useful information:
 
 Note that node red runs on port 1880 by default (MQTT runs on port 1883).
 
-### Node Editor
+## Node Editor
 
 For a basic interaction, find a "slider" node and plug it into a "debug" node.  You might have to install the dashboard module first:
 
@@ -342,28 +342,28 @@ msg = {
 }
 ```
 
-### APIs
+## APIs
 
 ![images/astro-api-response.png](images/astro-api-response.png)
 
-## Troubleshooting
+# Troubleshooting
 
 **Can't connect to micropython.org/webrepl**
 
 Try the `http` site and _not_ the `https` site.  If you try to access from the `https` site browsers may refuse to serve the "insecure content" from the websocket.
 
-## To Do
+# To Do
 
-### Document the QOS settings for mqtt
+## Document the QOS settings for mqtt
 
 The broker will hold the last message sent, and if you run
 `mq.wait_msg()` the board will listen for a message again and get
 whatever was sent in the interim (with the current qos configuration,
 this can be changed).
 
-## Setting up a Raspberry Pi
+# Setting up a Raspberry Pi
 
-### Basic Setup
+## Basic Setup
 
 These instructions are for a headless (no monitor) Raspberry Pi W0.
 
@@ -440,15 +440,9 @@ pi@raspberrypi:~ $ sudo apt update
 pi@raspberrypi:~ $ sudo apt upgrade
 ```
 
-### Installing MQTT
+# Best Practices
 
-```
-pi@raspberrypi:~ $ sudo apt install mosquitto mosquitto-clients
-```
-
-## Best Practices
-
-### Circuits
+## Circuits
 
 **Unplug** your microcontroller before you change the wiring.
 
@@ -462,7 +456,7 @@ Connect in this order:
 	1. data
 
 
-## Resources
+# Resources
 
 "How Consumer IoT Devices Expose Information" [https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information](https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information)
 
