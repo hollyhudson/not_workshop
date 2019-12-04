@@ -18,6 +18,8 @@
   - [Installation](#installation-1)
   - [Node Editor](#node-editor)
   - [APIs](#apis)
+- [SNoT - Secure Network of Things](#snot---secure-network-of-things)
+  - [Securing MQTT](#securing-mqtt)
 - [Troubleshooting](#troubleshooting)
 - [To Do](#to-do)
   - [Document the QOS settings for mqtt](#document-the-qos-settings-for-mqtt)
@@ -407,6 +409,16 @@ msg = {
 ## APIs
 
 ![images/astro-api-response.png](images/astro-api-response.png)
+
+# SNoT - Secure Network of Things
+
+In general, securing the system is beyond the scope of this workshop.  The design presented here is not exposed to the internet, so in order to control devices an attacker would have to log onto your home wifi, which provides some basic protection for most threat models (ie., if you are not specifically a target of someone).
+
+Here are some additional protections you can add that are not too much trouble.
+
+## Securing MQTT
+
+In the `mosquitto.conf` file (how to find this is in the main MQTT section) there's a section on access control.  You can set usernames an passwords for your clients, and you can restrict who can subscribe and publish based on topic and/or client ID.
 
 # Troubleshooting
 
