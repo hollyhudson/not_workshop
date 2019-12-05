@@ -137,6 +137,8 @@ You can restrict who can publish and subscribe to messages by setting client ID 
 
 # Things on ESP boards
 
+[https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series](https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series)
+
 ## Flashing micropython onto the board
 
 First, let's erase whatever is on the ESP board, and flash it with MicroPython.  We'll use esptool for both steps, which you can install with `pip` with one of the following (or however else you like to do python package management):
@@ -182,7 +184,7 @@ Hard resetting via RTS pin...
 Then flash:
 
 ```bash
-> esptool.py --port /dev/tty.SLAB_USBtoUART --baud 460800 write_flash --flash_size=detect 0 Desktop/esp8266-20190529-v1.11.bin
+> esptool.py --port /dev/tty.SLAB_USBtoUART --baud 460800 write_flash --flash_size=detect 0 esp8266-20190529-v1.11.bin
 esptool.py v2.8
 Serial port /dev/tty.SLAB_USBtoUART
 Connecting........_
@@ -337,6 +339,12 @@ You can also run small snippets of code directly from the python prompt to test 
 
 # Node Red
 
+![example flow for Node Red](images/nodered-example-flow.png)
+
+If you do a lot of programming, you're probably already thinking of ways to script automations for your devices with MQTT.  But if you don't want to write a lot of code, or want to make it possible for non-programmers in your household or workspace to edit automations, Node Red is a good option.  Most of the interface is boxes (nodes) that you "wire" together to pass messages from one component to another, with some javascript thrown in where necessary to customise the logic of those automations.  Plus you can easily create a web-based dashboard of buttons and switches that folks can access from their laptops and smartphones.
+
+![example dashboard for Node Red](images/nodered-example-dashboard.png)
+
 ## Installation
 
 If you don't already have node.js installed, get it here: [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
@@ -377,7 +385,9 @@ Node Red's basic function is to send messages from one thing to another.  While 
 }
 ```
 
-When you open a node containing code, by default the message object will be called `msg`, and the actual message being passed will be in the "payload" property:
+You can modify messages and automate decisions based on messages by using javascript with the "function" node.  When you open it you'll see `return msg;` in the textbox.  You just add your code above that.  The incoming message object is stored in the `msg` variable, so if you do nothing the message will pass through the node unchanged.
+
+But you probably want to alter the message.  Here's what you need to know.  The actual content of the message is stored in the "payload" property of the message object:
 
 ```javascript
 msg = {
@@ -385,30 +395,106 @@ msg = {
 }
 ```
 
+Which can also be written:
+
+```javascript
+msg.payload = "on";
+```
+
 Above is a common example where you want to pass the string "on" to a device to, for example, turn on a lightbulb.
 
-The payload can be a string, as above, a number (don't use quotes), a boolean (true or false), an array:
+The payload can be a string, as above, a number (don't use quotes), a boolean (true or false), an array, or an object.  For instance, here's a message that I use to set the brightness and color temperature of an Ikea smart bulb, where the payload is an object:
 
 ```javascript
-msg = {
-	"payload": ["red","blue","green"]
-}
+msg.payload = {
+	"brightness": 150,
+	"mired": 400
+}	
 ```
 
-or it can be an object:
+Since you can write javascript in the function node, you can add logic.  For instance, the color spectrum Ikea smart bulbs use color names instead of numerical values.  I wanted to be able to use a slider on the dashboard to change the color, and the slider would just return numbers, so I needed to convert those numbers into colors to actually craft a message that the Ikea device would understand.  Here's the code:
 
 ```javascript
-msg = {
-	"payload": {
-		"bulb1": "on",
-		"bulb2": "off"
-	}	
-}
+var colors = [
+	"dark peach",
+	"warm amber",
+	"candlelight",
+	"warm",
+	"sunrise",
+	"normal",
+	"lime",
+	"yellow",
+	"pink",
+	"saturated pink",
+	"light purple",
+	"saturated purple",
+	"blue",
+	"light blue",
+	"cold sky",
+	"cool daylight",
+	"focus"];
+    
+index = msg.payload; // incoming msg, which is an int
+color_name = colors[index];
+msg.payload = {
+    "color": color_name
+};
+
+return msg;
 ```
+
+You'll probably want to turn a bunch of lights on or off at once, but MQTT doesn't let you publish to multiple topics at the same time.  In Node Red you can solve this problem by creating an array of messages in a function node:
+
+```javascript
+var incoming_payload = msg.payload; // will be "on" or "off"
+
+var messages = [];
+
+var topics = [
+	"home/upstairs/bedroom/light/state",
+	"home/upstairs/hall/light/state",
+	"home/upstairs/beadroom/heater/state"
+];
+    
+for (var topic of topics) {
+	messages.push({payload: incoming_payload, topic: topic});
+}
+return [messages];
+```
+
+Sometimes I declare my variables with `var`, sometimes I don't bother.  In both cases it works.  There's probably something to be said here in regards to best practices.. but 🤷🏻
 
 ## APIs
 
-![images/astro-api-response.png](images/astro-api-response.png)
+If you want to get online data like weather data, you can do that with an http request.  Here is an example with my favorite online api:
+
+![example nodes](images/api-nodes.png)
+
+Inside the http node (the "get astronaut json" node):
+
+![images/api-get-request.png](images/api-get-request.png)
+
+And the code in the function node that extracts the data we want from the json object so we can display it on the dashboard:
+
+```javascript
+var people_obj = msg.payload["people"];
+var output_str = "";
+
+for (var person of people_obj) {
+	if (person == people_obj[0]) {
+		output_str = person.name;
+	} else if (person == people_obj[people_obj.length - 1]) {
+		output_str = output_str + ", and " + person["name"];
+	} else {
+		output_str = output_str + ", " + person["name"];
+	}
+}
+
+output_str = output_str + " are all in space right now."
+
+var new_msg = { "payload": output_str}
+return new_msg;
+```
 
 # SNoT - Secure Network of Things
 

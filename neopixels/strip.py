@@ -12,10 +12,9 @@ wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
 
-NUM_PIXELS = 24
+NUM_PIXELS = 7
 # NeoPixel(Pin([pin number], Pin.OUT), [number of pixel])
-np = NeoPixel(Pin(15, Pin.OUT), NUM_PIXELS) 
-onboard_led = Pin(0, Pin.OUT)
+np = NeoPixel(Pin(0, Pin.OUT), NUM_PIXELS) 
 
 # red, green, and blue values for the leds
 r, g, b = 0, 0, 0
