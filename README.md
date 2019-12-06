@@ -20,6 +20,7 @@
   - [APIs](#apis)
 - [SNoT - Secure Network of Things](#snot---secure-network-of-things)
   - [Securing MQTT](#securing-mqtt)
+  - [Securing Node Red](#securing-node-red)
 - [Troubleshooting](#troubleshooting)
 - [To Do](#to-do)
   - [Document the QOS settings for mqtt](#document-the-qos-settings-for-mqtt)
@@ -28,6 +29,11 @@
 - [Best Practices](#best-practices)
   - [Circuits](#circuits)
 - [Resources](#resources)
+  - [Hardware](#hardware)
+  - [Software](#software)
+  - [Products](#products)
+  - [Tutorials and Talks](#tutorials-and-talks)
+  - [Readings](#readings)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -351,9 +357,9 @@ If you don't already have node.js installed, get it here: [https://nodejs.org/en
 
 Next, install Node Red: [https://nodered.org/docs/getting-started/local](https://nodered.org/docs/getting-started/local)
 
-Once it is done installing, if you click "Running" in the side bar there's detailed information on how to use it.
+On the website, if you click "Running" in the side bar you'll see detailed information on how to use it once it's installed.
 
-When you run `node-red` it will provide you with some useful information:
+On the command line type `node-red` to start it, and it will provide you with some useful information:
 
 ```bash
 2 Dec 17:44:35 - [info] Settings file  : /Users/holly/.node-red/settings.js
@@ -466,7 +472,7 @@ Sometimes I declare my variables with `var`, sometimes I don't bother.  In both 
 
 ## APIs
 
-If you want to get online data like weather data, you can do that with an http request.  Here is an example with my favorite online api:
+If you want to get online data like weather data, you can do that with an http request to the website of your choice.  Here is an example with my favorite online API:
 
 ![example nodes](images/api-nodes.png)
 
@@ -474,7 +480,7 @@ Inside the http node (the "get astronaut json" node):
 
 ![images/api-get-request.png](images/api-get-request.png)
 
-And the code in the function node that extracts the data we want from the json object so we can display it on the dashboard:
+And here is the code in the function node that extracts the data we want from the json object so we can display it on the dashboard:
 
 ```javascript
 var people_obj = msg.payload["people"];
@@ -505,6 +511,8 @@ Here are some additional protections you can add that are not too much trouble.
 ## Securing MQTT
 
 In the `mosquitto.conf` file (how to find this is in the main MQTT section) there's a section on access control.  You can set usernames an passwords for your clients, and you can restrict who can subscribe and publish based on topic and/or client ID.
+
+## Securing Node Red
 
 # Troubleshooting
 
@@ -618,21 +626,46 @@ Connect in this order:
 
 # Resources
 
-"How Consumer IoT Devices Expose Information" [https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information](https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information)
+## Hardware
 
-Hackaday talk about cloudless IoT [https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/](https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/)
-
-Candle, privacy-friendly smarthome [https://www.candlesmarthome.com/](https://www.candlesmarthome.com/)
-
-Snips, private-by-design voice assistant [https://snips.ai/](https://snips.ai/)
-
-MQTT [https://mqtt.org/](https://mqtt.org/)
-
-Node Red, "low code" programming for networked things [https://nodered.org/](https://nodered.org/)
-
-Cloning a Raspberry Pi [https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image](https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image)
-
-Adafruit NeoPixel Uberguide [https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels)
+Details for ESP board used in this workshop: 
+[https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series](https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series)
 
 Adafruit ESP8266 Feather Huzzah pinout and guide:
 [https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts/](https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/pinouts/)
+
+## Software
+
+MQTT
+[https://mqtt.org/](https://mqtt.org/)
+
+Node Red, "low code" programming for networked things
+[https://nodered.org/](https://nodered.org/)
+
+Snips, private-by-design voice assistant
+[https://snips.ai/](https://snips.ai/)
+
+Mozilla's WebThings:
+[https://iot.mozilla.org/](https://iot.mozilla.org/)
+
+## Products
+
+Candle, privacy-friendly smarthome
+[https://www.candlesmarthome.com/](https://www.candlesmarthome.com/)
+
+## Tutorials and Talks
+
+Cloning a Raspberry Pi
+[https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image](https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image)
+
+Hackaday talk about cloudless IoT
+[https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/](https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/)
+
+Adafruit NeoPixel Uberguide
+[https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels)
+
+## Readings
+
+"How Consumer IoT Devices Expose Information"
+[https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information](https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information)
+
