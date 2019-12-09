@@ -1,6 +1,5 @@
 import time
 import network
-import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 
