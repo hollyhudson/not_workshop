@@ -18,6 +18,7 @@
   - [Installation](#installation-1)
   - [Node Editor](#node-editor)
   - [APIs](#apis)
+  - [Saving your work](#saving-your-work)
 - [SNoT - Secure Network of Things](#snot---secure-network-of-things)
   - [Securing MQTT](#securing-mqtt)
   - [Securing Node Red](#securing-node-red)
@@ -28,6 +29,7 @@
   - [Basic Setup](#basic-setup)
 - [Best Practices](#best-practices)
   - [Circuits](#circuits)
+  - [MQTT](#mqtt-1)
 - [Resources](#resources)
   - [Hardware](#hardware)
   - [Software](#software)
@@ -502,6 +504,18 @@ var new_msg = { "payload": output_str}
 return new_msg;
 ```
 
+## Saving your work
+
+**There is no undo in Node Red.**
+
+Your current flow setup is stored in `~/.node-red/flows_[something].json`.  
+It's a good idea to make a copy of this file frequently for back
+up.  If you put it in version control on github, make sure you
+haven't included any secret authentication information in any of
+the flows.
+
+Since the structure of the flows is stored as json, you can share your flows, and install other people's flows, by sharing the json description.
+
 # SNoT - Secure Network of Things
 
 In general, securing the system is beyond the scope of this workshop.  The design presented here is not exposed to the internet, so in order to control devices an attacker would have to log onto your home wifi, which provides some basic protection for most threat models (ie., if you are not specifically a target of someone).
@@ -576,7 +590,7 @@ Linux raspberrypi 4.19.75+ #1270 Tue Sep 24 18:38:54 BST 2019 armv6l
 
 The programs included with the Debian GNU/Linux system are free software;
 the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
+individual files in /usr/share/doc//copyright.
 
 Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
@@ -622,6 +636,12 @@ Connect in this order:
 	1. ground
 	1. power
 	1. data
+
+## MQTT
+
+For devices that can be turned on and off, like light bulbs, have two topics:
+
+Have a `my_bulb/state` that only the bulb publishes to.  If other devices, scripts, or dashboard interfaces want to control the bulb, they publish to a `my_bulb/set` topic instead. 
 
 
 # Resources
