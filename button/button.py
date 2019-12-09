@@ -1,11 +1,11 @@
 import time
 import network
-import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 
 ########### global variables ##############################
 
+mq = MQTTClient("button", "192.168.0.10")
 button = Pin(14, Pin.IN, Pin.PULL_UP) # which pin your LED is connected to
 
 ########### get on the network ############################
@@ -24,7 +24,6 @@ wlan.ifconfig()
 ######## MQTT Client: starting and connecting ##########
 
 # start the MQTT client for this microcontroller
-mq = MQTTClient("button", "192.168.0.10")
 mq.connect()
 
 ########## publishing an MQTT message ###############

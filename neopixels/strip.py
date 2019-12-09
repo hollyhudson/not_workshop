@@ -2,16 +2,14 @@
 
 import time
 import network
-import secrets
 import urandom
 from umqtt.simple import MQTTClient
 from machine import Pin
 from neopixel import NeoPixel
 
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
+########### global variables ##############################
 
+mq = MQTTClient("neo", "192.168.0.10")
 NUM_PIXELS = 7
 # NeoPixel(Pin([pin number], Pin.OUT), [number of pixel])
 np = NeoPixel(Pin(0, Pin.OUT), NUM_PIXELS) 
@@ -23,11 +21,13 @@ on = False
 pattern_on = False
 counter = []
 
-# the only random function in micropython is urandom.getrandbits()
-# and you can't do pattern mode without a little randomness
-def random(low,high):
-	result = int(low + urandom.getrandbits(8) * (high - low) / 256)
-	return result
+########### get on the network ############################
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
+
+########## while waiting to connect to the network ###############
 
 # keep trying to connect to the wifi until we suceed
 while not wlan.isconnected():
@@ -41,6 +41,16 @@ np.fill((0,0,10))
 np.write()
 
 wlan.ifconfig()
+
+######### helper functions ##########################
+
+# the only random function in micropython is urandom.getrandbits()
+# and you can't do pattern mode without a little randomness
+def random(low,high):
+	result = int(low + urandom.getrandbits(8) * (high - low) / 256)
+	return result
+
+######### LED control functions ##########################
 
 def pattern():
 	global pattern_r, pattern_g, pattern_b
@@ -68,7 +78,6 @@ def pattern():
 			counter[i] = counter[i] - 1
 
 	np.write()	
-
 
 def all_off():
 	np.fill((0,0,0))
@@ -111,10 +120,12 @@ def set_pattern(msg):
 		for i in range(NUM_PIXELS):
 			counter.append(random(100,500))
 
+################ MQTT Message switchboard #############################
+
 # topics we recognize with their respective functions
 subtopic = {
 	b'led/color': set_color,
-	b'led/state': set_state,
+	b'led/set': set_state,
 	b'led/pattern': set_pattern,
 }
 
@@ -127,8 +138,9 @@ def handle_msg(topic,msg):
 	else:
 		print("topic not recognized")
 
+######## MQTT Client: starting, connecting, and subscribing ##########
+
 # start the MQTT client for this microcontroller
-mq = MQTTClient("neo", "192.168.0.10")
 mq.set_callback(handle_msg) # handle_msg is called for ALL messages received
 mq.connect()
 mq.subscribe(b"led/#") # specify the topic to subscribe to (led in this case)

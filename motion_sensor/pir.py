@@ -1,11 +1,11 @@
 import time
 import network
-import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 
 ########### global variables ##############################
 
+mq = MQTTClient("pir", "192.168.0.10")
 pir = Pin(14, Pin.IN)
 
 ########### get on the network ############################
@@ -24,7 +24,6 @@ wlan.ifconfig()
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
 # (client_id, client_ip_address), client_id must be unique
-mq = MQTTClient("pir", "192.168.0.10")
 #mq.set_callback(handle_msg) # handle_msg() will be called for ALL messages received
 mq.connect()
 #mq.subscribe(b"led_panel/#")

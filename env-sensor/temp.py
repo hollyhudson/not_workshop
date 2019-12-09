@@ -1,12 +1,12 @@
 import time
 import network
-import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 from dht import DHT22
 
 ########### global variables ##############################
 
+mq = MQTTClient("dht_sensor", "192.168.0.10")
 dht_sensor = DHT22(Pin(14)) # which pin your NeoPixels are connected to
 
 ########### get on the network ############################
@@ -25,7 +25,6 @@ wlan.ifconfig()
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
 # (client_id, client_ip_address), client_id must be unique
-mq = MQTTClient("dht_sensor", "192.168.0.10")
 mq.connect()
 
 ######### Publishing an MQTT message ########################

@@ -1,12 +1,12 @@
 import time
 import network
-import secrets
 from umqtt.simple import MQTTClient
 from machine import Pin
 
 ########### global variables ##############################
 
-my_led = Pin(14, Pin.OUT) # which pin your LED is connected to
+mq = MQTTClient("led", "192.168.0.10")
+my_led = Pin(0, Pin.OUT) # which pin your LED is connected to
 
 ########### get on the network ############################
 
@@ -49,7 +49,6 @@ def handle_msg(topic,msg):
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
 # start the MQTT client for this microcontroller
-mq = MQTTClient("led", "192.168.0.10")
 mq.set_callback(handle_msg) # handle_msg() is called for ALL messages received
 mq.connect()
 mq.subscribe(b"my_led/#") 
