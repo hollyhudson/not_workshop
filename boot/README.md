@@ -14,4 +14,15 @@ either with the existing webrepl upload tool or using
 ampy -p /dev/ttyUSB0 put boot.py
 ```
 
+# Initial configuration
+
+The device stores the wifi essid and password in flash, but it needs
+to be configured.  Additionally, the webrepl will automatically start
+if the `webrepl_cfg.py` file exists and contains a password.
+
+This can be scripted with `ampy.py` as well:
+
+```
+ampy -p /dev/ttyUSB0 run config.py
+```
 
