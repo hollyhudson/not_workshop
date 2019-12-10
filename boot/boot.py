@@ -63,3 +63,7 @@ def _wifi_status_display():
 	gc.collect()
 
 _wifi_status_display()
+
+# start the local web server for the webrepl
+import webserver
+webserver.start()
