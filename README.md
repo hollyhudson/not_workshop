@@ -65,6 +65,36 @@
 
 ## Flashing micropython onto the board
 
+### setup.py script method
+
+You'll want to install esptool and ampy with pip or pip3:
+
+```bash
+> pip3 install esptool.py
+> pip3 install pip3 install adafruit-ampy
+```
+
+Run the setup script in the boot directory:
+
+Type the beginning of the command, then hit `tab` to find the correct serial port:
+
+```bash
+> ./setup.sh /dev/tty.[tab]
+tty.AVSamsungSoundbarK450K-  tty.SLAB_USBtoUART
+tty.Bluetooth-Incoming-Port  tty.SOC
+tty.MALS                     tty.usbserial-01DAA363
+```
+
+then finish typing the command:
+
+```bash
+> ./setup.sh /dev/tty.SLAB_USBtoUART wifi_name wifi_password
+```
+
+If your esp board is now showing the wifi network name and an IP address, it worked.
+
+### Manual method
+
 First, let's erase whatever is on the ESP board, and flash it with MicroPython.  We'll use esptool for both steps, which you can install with `pip` with one of the following (or however else you like to do python package management):
 
 ```bash
@@ -164,7 +194,7 @@ To see your board's ip address:
 
 It's the first address.  **Remember this**, you'll use it in a bit.
 
-## Enabling webrepl
+#### Enabling webrepl
 
 ```python
 >>> import webrepl_setup
