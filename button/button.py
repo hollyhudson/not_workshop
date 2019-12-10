@@ -5,21 +5,8 @@ from machine import Pin
 
 ########### global variables ##############################
 
-mq = MQTTClient("button", "192.168.0.10")
-button = Pin(14, Pin.IN, Pin.PULL_UP) # which pin your LED is connected to
-
-########### get on the network ############################
-
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
-
-########## while waiting to connect to the network ###############
-
-while not wlan.isconnected():
-	time.sleep_ms(500)
-
-wlan.ifconfig()
+mq = MQTTClient("hollybutton", "192.168.0.12")
+button = Pin(13, Pin.IN, Pin.PULL_UP) # which pin your LED is connected to
 
 ######## MQTT Client: starting and connecting ##########
 
@@ -41,10 +28,10 @@ def momentary():
 
 		if not button_value:
 			print("pressed!!!!!")
-			mq.publish(topic="my_led/state", msg="on")
+			mq.publish(topic="blue_led/state", msg="on")
 		else:
 			print("not pressed")
-			mq.publish(topic="my_led/state", msg="off")
+			mq.publish(topic="blue_led/state", msg="off")
 	
 		time.sleep(0.1)
 
