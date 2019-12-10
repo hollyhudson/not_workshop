@@ -3,10 +3,6 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Names](#names)
-- [MQTT](#mqtt)
-  - [Installation](#installation)
-  - [Commands](#commands)
-  - [Configuration](#configuration)
 - [Things on ESP boards](#things-on-esp-boards)
   - [Flashing micropython onto the board](#flashing-micropython-onto-the-board)
   - [Enabling webrepl](#enabling-webrepl)
@@ -14,6 +10,10 @@
   - [Using webrepl](#using-webrepl)
     - [Setup](#setup)
     - [Workflow](#workflow)
+- [MQTT](#mqtt)
+  - [Installation](#installation)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
 - [Node Red](#node-red)
   - [Installation](#installation-1)
   - [Node Editor](#node-editor)
@@ -58,90 +58,6 @@
 
 **SNoT**
 	Secure Network of Things
-
-# MQTT
-
-MQTT is a simple, lightweight messaging protocol.  Clients can both publish to and subscribe to topics.  If I publish to a topic called "talk", everyone who is subscribed to that topic will get the message.  Topics can be anything, and they are hierarchical.  So I can have, for instance:
-
-```
-house/kitchen/lights/overhead
-house/kitchen/lights/sink
-house/kitchen/lights/under_counter
-house/kitchen/sensors/temp
-house/kitchen/sensors/humidity
-```
-
-Using this example, I could turn on the overhead light in the kitchen by publishing the message `on` to `house/kitchen/lights/overhead`, and I could subscribe to receive messsages from all the sensors in the kitchen by subscribing to `house/kitchen/sensors/#`.  (The `#` here is a wildcard.)
-
-This is a convenient protocol because of its simplicity.  It has far less overhead than http, it's an open standard so it can be freely used and integrated into projects, and there are libraries for several languages (python, javascript, C/C++).
-
-To use MQTT you need to have one device act as a broker that receives all published messages and sends them out to subscribers.  For an IoT setup you'll probably want this to be a machine that stays on all the time, like a Raspberry Pi.  The most popular broker is Mosquitto.  It's free and open source, and runs on Linux, MacOs, and Windows.
-
-## Installation
-
-For MQTT you'll need a broker to act as the main switchboard for all your messages, and a client running on each of your devices.  For testing purposes it's good to install both a broker and client module on whatever computer you're running the broker on.  You can do this with whatever package manager you use, here are some examples:
-
-Linux/Debian/Ubuntu:
-```bash
-> sudo apt install mosquitto mosquitto-clients
-```
-
-MacOS:
-```bash
-> sudo port install mosquitto mosquitto-clients
-```
-
-or
-
-```bash
-> brew install mosquitto mosquitto-clients
-```
-
-Here's the Mosquitto website: [https://mosquitto.org/](https://mosquitto.org/), if you want to download it directly or build it from source.
-
-## Commands
-
-To start a broker (in verbose mode):
-
-```bash
-> mosquitto -v
-```
-
-The basic format for subscribing to a topic, and for publishing a message to that topic:
-
-```bash
-> mosquitto_sub -h [host ip] -t [topic]
-> mosquitto_pub -h [host ip] -t [topic] -m [message]
-```
-
-example:
-
-```bash
-> mosquitto_sub -h 129.168.0.23 -t led 
-> mosquitto_pub -h 129.168.0.23 -t led -m 255,0,255
-```
-
-You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You cannot use wildcards to publish to more than one topic.
-
-**living_room/#**
-	all topics for all devices in your living room
-
-**living_room/+/bulb**
-	all the lightbulbs in your living room
-
-## Configuration
-
-Where to find `mosquitto.conf`:
-
-* MacOS - `/usr/local/etc/mosquitto`
-* Linux - `/etc/mosquitto`
-* Windows - `c:\mosquitto\`
-
-By default the mosquitto broker runs on port 1883, unless you intentionally start it on another port: `mosquitto -p 1884`, for instance.
-
-MQTT messages are sent in plaintext.  If you want to encrypt them you have to use SSL.  But there are some other things you can do that are fairly simple to provide some security.
-
-You can restrict who can publish and subscribe to messages by setting client ID restrictions on your broker.
 
 # Things on ESP boards
 
@@ -344,6 +260,93 @@ Now send the debugged file and import again.  (You only need to import `sys` onc
 Now we can write, run, and debug over and over again.
 
 You can also run small snippets of code directly from the python prompt to test things out if you want.
+
+# MQTT
+
+MQTT is a simple, lightweight messaging protocol.  Clients can both publish to and subscribe to topics.  If I publish to a topic called "talk", everyone who is subscribed to that topic will get the message.  Topics can be anything, and they are hierarchical.  So I can have, for instance:
+
+```
+house/kitchen/lights/overhead
+house/kitchen/lights/sink
+house/kitchen/lights/under_counter
+house/kitchen/sensors/temp
+house/kitchen/sensors/humidity
+```
+
+Using this example, I could turn on the overhead light in the kitchen by publishing the message `on` to `house/kitchen/lights/overhead`, and I could subscribe to receive messsages from all the sensors in the kitchen by subscribing to `house/kitchen/sensors/#`.  (The `#` here is a wildcard.)
+
+This is a convenient protocol because of its simplicity.  It has far less overhead than http, it's an open standard so it can be freely used and integrated into projects, and there are libraries for several languages (python, javascript, C/C++).
+
+To use MQTT you need to have one device act as a broker that receives all published messages and sends them out to subscribers.  For an IoT setup you'll probably want this to be a machine that stays on all the time, like a Raspberry Pi.  The most popular broker is Mosquitto.  It's free and open source, and runs on Linux, MacOs, and Windows.
+
+## Installation
+
+For MQTT you'll need a broker to act as the main switchboard for all your messages, and a client running on each of your devices.  For testing purposes it's good to install both a broker and client module on whatever computer you're running the broker on.  You can do this with whatever package manager you use, here are some examples:
+
+Linux/Debian/Ubuntu:
+```bash
+> sudo apt install mosquitto mosquitto-clients
+```
+
+MacOS:
+```bash
+> sudo port install mosquitto mosquitto-clients
+```
+
+or
+
+```bash
+> brew install mosquitto mosquitto-clients
+```
+
+Here's the Mosquitto website: [https://mosquitto.org/](https://mosquitto.org/), if you want to download it directly or build it from source.
+
+## Commands
+
+To start a broker (in verbose mode):
+
+```bash
+> mosquitto -v
+```
+
+The basic format for subscribing to a topic, and for publishing a message to that topic:
+
+```bash
+> mosquitto_sub -h [host ip] -t [topic]
+> mosquitto_pub -h [host ip] -t [topic] -m [message]
+```
+
+example:
+
+```bash
+> mosquitto_sub -h 129.168.0.23 -t led 
+> mosquitto_pub -h 129.168.0.23 -t led -m 255,0,255
+```
+
+You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You cannot use wildcards to publish to more than one topic.
+
+**living_room/\#**
+	all topics for all devices in your living room (you have to escape the `#` character on the command line)
+
+**living_room/+/bulb**
+	all the lightbulbs in your living room
+
+**\#**
+	subscribe to all messages
+
+## Configuration
+
+Where to find `mosquitto.conf`:
+
+* MacOS - `/usr/local/etc/mosquitto`
+* Linux - `/etc/mosquitto`
+* Windows - `c:\mosquitto\`
+
+By default the mosquitto broker runs on port 1883, unless you intentionally start it on another port: `mosquitto -p 1884`, for instance.
+
+MQTT messages are sent in plaintext.  If you want to encrypt them you have to use SSL.  But there are some other things you can do that are fairly simple to provide some security.
+
+You can restrict who can publish and subscribe to messages by setting client ID restrictions on your broker.
 
 # Node Red
 

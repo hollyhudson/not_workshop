@@ -6,6 +6,8 @@
 
 ![DHT22 AM2302 Temperature and Humidity Sensor](DHT22-pinout.png)
 
+**IMPORTANT** you need a resistor between the power and data pins, which is not shown below.
+
 ![wiring diagram](esp-wiring-dht.JPG)
 
 ![wiring diagram](DHT22-wiring.png)
