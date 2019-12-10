@@ -1,3 +1,19 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Printing](#printing)
+- [Data Types](#data-types)
+- [Globals](#globals)
+- [Arrays aka Collections](#arrays-aka-collections)
+- [Loops](#loops)
+- [Conditionals](#conditionals)
+- [Functions aka Methods](#functions-aka-methods)
+- [Processing Text](#processing-text)
+- [Math](#math)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Printing
 
 print("yo!")
@@ -33,7 +49,7 @@ print(foo) 	# result will be 2
 
 ## Arrays aka Collections
 
-Python doesn't have arrays specifically, instead choose from the following data types:
+Instead of arrays, python has lists.  There are four types to choose from:
 
 **List**
 	ordered, changeable, duplicates allowed, ["one", "two"]
@@ -106,7 +122,7 @@ You can join expressions with `and`, `or`, and `not`.
 A method is a function that belongs to a class/object.
 
 ```python
-def name(parameters):
+def function_name(parameters):
 	# statements
 ```
 
@@ -114,7 +130,7 @@ def name(parameters):
 
 username, domain = message.split('@')
 
-Concatenate strings with `+`:
+Concatenate strings and lists with `+`:
 
 ```python
 a = [1,2]

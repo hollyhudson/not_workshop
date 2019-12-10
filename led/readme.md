@@ -1,6 +1,6 @@
 # Making an LED blink
 
-![fritzing diagram](led-fritzing.png)
+![wiring diagram](esp-wiring-led.PNG)
 
 ![schematic](led-schematic.png)
 

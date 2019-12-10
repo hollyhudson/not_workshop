@@ -1,6 +1,6 @@
 # Using a button or switch for input
 
-![fritzing diagram](button-fritzing.png)
+![wiring diagram](esp-wiring-button.PNG)
 
 ![schematic](button-schematic.png)
 

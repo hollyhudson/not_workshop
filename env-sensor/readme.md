@@ -6,6 +6,8 @@
 
 ![DHT22 AM2302 Temperature and Humidity Sensor](DHT22-pinout.png)
 
+![wiring diagram](esp-wiring-dht.JPG)
+
 ![wiring diagram](DHT22-wiring.png)
 
 Connect the power line to the 3.3V pin (VDD in the diagram), not VBATT (which is 5.5V).  The components on the ESP board are not 5V-tolerant, so you will damage them if you feed 5 volts in, which will happen when the board tries to read from the sensor if the sensor is connected to a 5V power source.  (Note:  You can drive a 5V _output_ component such as a strip of NeoPixels with the VBATT pin because those 5 volts will be going out to the component and not returning to the board.)
@@ -23,6 +25,8 @@ DHT22 Specifications
 * Accuracy: ±0.5°C and ±1%
 
 More details here: [https://components101.com/sensors/dht22-pinout-specs-datasheet](https://components101.com/sensors/dht22-pinout-specs-datasheet)
+
+And a tutorial is here: [https://randomnerdtutorials.com/esp32-esp8266-dht11-dht22-micropython-temperature-humidity-sensor/](https://randomnerdtutorials.com/esp32-esp8266-dht11-dht22-micropython-temperature-humidity-sensor/)
 
 ### How do you find this information?
 
