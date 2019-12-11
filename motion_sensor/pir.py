@@ -1,46 +1,33 @@
 import time
 import network
+from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin
 
 ########### global variables ##############################
 
-mq = MQTTClient("pir", "192.168.0.10")
-pir = Pin(14, Pin.IN)
+unique_ID = hexlify(network.WLAN().config('mac'))
 
-########### get on the network ############################
+def config  = {
+    'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
+    'mqtt_client': unique_ID, # this device client ID
+    'pin': 0, # which pin the pir sensor is on
+}
 
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
-
-########## while waiting to connect to the network ###############
-
-while not wlan.isconnected():
-	time.sleep_ms(500)
-
-wlan.ifconfig()
+mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
+pir = Pin(config.pin, Pin.IN)
 
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
-# (client_id, client_ip_address), client_id must be unique
-#mq.set_callback(handle_msg) # handle_msg() will be called for ALL messages received
 mq.connect()
-#mq.subscribe(b"led_panel/#")
-
-# wait for MQTT messages forever
-# when one is received the function we passed to set_callback() will be run
-#while True:
-#	mq.check_msg()
 
 ######### Publishing an MQTT message ########################
 
 # Code involving publishing must come after the client is declared
 
-# edge-triggered (detects when value changes state)
-
 last_pir_value = False
 
+# edge-triggered (detects when value changes state)
 while True:
 	new_pir_value = pir.value()
 

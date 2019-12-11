@@ -2,18 +2,24 @@ import time
 import network
 import secrets
 import urandom
+from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin
 from neopixel import NeoPixel
 
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
+########### global variables ##############################
 
-NUM_PIXELS = 24
-# NeoPixel(Pin([pin number], Pin.OUT), [number of pixel])
-np = NeoPixel(Pin(15, Pin.OUT), NUM_PIXELS) 
-onboard_led = Pin(0, Pin.OUT)
+unique_ID = hexlify(network.WLAN().config('mac'))
+
+def config  = {
+    'mqtt_broker': '192.168.0.12', # central server for our mqtt network
+    'mqtt_client': unique_ID, # this device client ID
+    'pin': 0,
+    'num_pixels': 7,
+}
+
+mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
+np = NeoPixel(Pin(config.pin, Pin.OUT), config.num_pixels)
 
 # red, green, and blue values for the leds
 r, g, b = 0, 0, 0
@@ -22,24 +28,15 @@ on = False
 discoing = False
 counter = []
 
+######### helper functions ###############################
+
 # the only random function in micropython is urandom.getrandbits()
 # and you can't do disco mode without a little randomness
 def random(low,high):
 	result = int(low + urandom.getrandbits(8) * (high - low) / 256)
 	return result
 
-# keep trying to connect to the wifi until we suceed
-while not wlan.isconnected():
-        np.fill((10,0,0))
-        np.write()
-        time.sleep_ms(200)
-        np.fill((0,0,0))
-        np.write()
-        time.sleep_ms(300)
-np.fill((0,0,10))
-np.write()
-
-wlan.ifconfig()
+######### LED control functions ##########################
 
 def disco_pattern():
 	global disco_r, disco_g, disco_b
@@ -67,7 +64,6 @@ def disco_pattern():
 			counter[i] = counter[i] - 1
 
 	np.write()	
-
 
 def all_off():
 	np.fill((0,0,0))
@@ -110,11 +106,13 @@ def set_disco(msg):
 		for i in range(NUM_PIXELS):
 			counter.append(random(100,500))
 
+################ MQTT Message switchboard #############################
+
 # topics we recognize with their respective functions
 subtopic = {
-	b'led/color': set_color,
-	b'led/state': set_state,
-	b'led/disco': set_disco,
+	b'pixels/color': set_color,
+	b'pixels/state': set_state,
+	b'pixels/disco': set_disco,
 }
 
 def handle_msg(topic,msg):
@@ -126,11 +124,12 @@ def handle_msg(topic,msg):
 	else:
 		print("topic not recognized")
 
+######## MQTT Client: starting, connecting, and subscribing ##########
+
 # start the MQTT client for this microcontroller
-mq = MQTTClient("neo", "192.168.0.10")
 mq.set_callback(handle_msg) # handle_msg is called for ALL messages received
 mq.connect()
-mq.subscribe(b"led/#") # specify the topic to subscribe to (led in this case)
+mq.subscribe(b"pixels/#") # specify the topic to subscribe to (led in this case)
 
 # wait for messages forever
 # when one is received the function we passed to set_callback() will be run
