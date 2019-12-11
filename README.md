@@ -2,12 +2,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Names](#names)
+- [STEP ONE](#step-one)
 - [Things on ESP boards](#things-on-esp-boards)
-  - [Flashing micropython onto the board](#flashing-micropython-onto-the-board)
-    - [setup.py script method](#setuppy-script-method)
-    - [Manual method](#manual-method)
-      - [Enabling webrepl](#enabling-webrepl)
   - [Is it working?](#is-it-working)
   - [Using webrepl](#using-webrepl)
     - [Setup](#setup)
@@ -32,185 +28,37 @@
 - [Best Practices](#best-practices)
   - [Circuits](#circuits)
   - [MQTT](#mqtt-1)
+  - [Using the OLED screen](#using-the-oled-screen)
 - [Resources](#resources)
   - [Hardware](#hardware)
   - [Software](#software)
   - [Products](#products)
   - [Tutorials and Talks](#tutorials-and-talks)
   - [Readings](#readings)
+- [What shall we call this?](#what-shall-we-call-this)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Names
+# STEP ONE
 
-**CIot**
-	Cloudless Internet of Things (?)
+Install mosquitto (the most popular implementation of MQTT).
 
-**IoT**
-	Intranet of Things (psuedonymous on Hackaday)
+**Linux**
+ 	It's probably already there.  Run `which mosquitto` to check.
 
-**LANoT**
-	Local Area Network of Things (?)
+**Mac**
+	Use your favorite package manager to install to install `mosquitto` and `mosquitto-clients`.  If those words didn't mean anything to you, congratulations, you will now gain a favorite package manager.  Homebrew is the most popular these days: [https://brew.sh/](https://brew.sh/), but I prefer MacPorts: [https://www.macports.org/](https://www.macports.org/).  Install one and type `brew install mosquitto mosquitto-clients` or `port install mosquitto mosquitto-clients`.  If it fails, take off the `mosquitto-clients` part and try again.
 
-**LANoH**
-	Local Area Network of Hacky-things (Eliot Williams on Hackaday)
+**Windows**
+	The website has a download option: [https://mosquitto.org/download/](https://mosquitto.org/download/).
 
-**NoT**
-	Network of Things 
-
-**SNoT**
-	Secure Network of Things
 
 # Things on ESP boards
 
+You can find detailed information about the board we are using here:
 [https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series](https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series)
 
-## Flashing micropython onto the board
-
-### setup.py script method
-
-You'll want to install esptool and ampy with pip or pip3:
-
-```bash
-> pip3 install esptool.py
-> pip3 install pip3 install adafruit-ampy
-```
-
-Run the setup script in the boot directory:
-
-Type the beginning of the command, then hit `tab` to find the correct serial port:
-
-```bash
-> ./setup.sh /dev/tty.[tab]
-tty.AVSamsungSoundbarK450K-  tty.SLAB_USBtoUART
-tty.Bluetooth-Incoming-Port  tty.SOC
-tty.MALS                     tty.usbserial-01DAA363
-```
-
-then finish typing the command:
-
-```bash
-> ./setup.sh /dev/tty.SLAB_USBtoUART wifi_name wifi_password
-```
-
-If your esp board is now showing the wifi network name and an IP address, it worked.
-
-### Manual method
-
-First, let's erase whatever is on the ESP board, and flash it with MicroPython.  We'll use esptool for both steps, which you can install with `pip` with one of the following (or however else you like to do python package management):
-
-```bash
-> pip install esptool.py
-> pip3 install esptool.py
-```
-
-The code you'll want to flash can be found at [http://micropython.org/download](http://micropython.org/download).  
-
-You have to specify which USB port your board is on, and you can find that by typing `[tab]` after `/dev/tty.` to see what the possibilities are:
-
-```bash
-> esptool.py --port /dev/tty.
-tty.AVSamsungSoundbarK450K-  tty.SLAB_USBtoUART
-tty.Bluetooth-Incoming-Port  tty.SOC
-tty.MALS                     tty.usbserial-00FEB022
-```
-
-That `SLAB_USBtoUART` one is the one we want. First erase:
-
-```bash
-> esptool.py --port /dev/tty.SLAB_USBtoUART erase_flash
-esptool.py v2.8
-Serial port /dev/tty.SLAB_USBtoUART
-Connecting........_
-Detecting chip type... ESP8266
-Chip is ESP8266EX
-
-Features: WiFi
-Crystal is 26MHz
-MAC: 18:fe:34:d4:0d:3e
-
-Uploading stub...
-Running stub...
-Stub running...
-Erasing flash (this may take a while)...
-Chip erase completed successfully in 9.1s
-Hard resetting via RTS pin...
-```
-
-Then flash:
-
-```bash
-> esptool.py --port /dev/tty.SLAB_USBtoUART --baud 460800 write_flash --flash_size=detect 0 esp8266-20190529-v1.11.bin
-esptool.py v2.8
-Serial port /dev/tty.SLAB_USBtoUART
-Connecting........_
-Detecting chip type... ESP8266
-Chip is ESP8266EX
-Features: WiFi
-Crystal is 26MHz
-MAC: 18:fe:34:d4:0d:3e
-Uploading stub...
-Running stub...
-Stub running...
-Changing baud rate to 460800
-Changed.
-Configuring flash size...
-Auto-detected Flash size: 4MB
-Flash params set to 0x0040
-Compressed 617880 bytes to 402086...
-Wrote 617880 bytes (402086 compressed) at 0x00000000 in 9.7 seconds (effective 511.6 kbit/s)...
-Hash of data verified.
-
-Leaving...
-Hard resetting via RTS pin...
-```
-
-Finally, run `screen`, which will let us interact directly with the serial (USB) port so that we can get an interactive python prompt from our python installation on the board:
-
-```bash
-> screen /dev/tty.SLAB_USBtoUART 115200
-```
-
-Hit `enter` to get a prompt.
-
-Hit `ctrl-D` to reset it, which will display the version of micropython that's flashed to the board.
-
-To quit type `ctrl-A` `ctrl-\`.
-
-In screen, put the board on your local network by:
-
-```python
->>> import network
->>> wlan = network.WLAN(network.STA_IF)
->>> wlan.active(True)
-#8 ets_task(4020f4d8, 28, 3fff9e28, 10)
->>> wlan.connect("your_wifi", "password") # your local wifi credentials go here
-```
-
-To see your board's ip address:
-
-```
->>> wlan.ifconfig()
-('192.168.0.38', '255.255.255.0', '192.168.0.1', '192.168.0.1')
-```
-
-It's the first address.  **Remember this**, you'll use it in a bit.
-
-#### Enabling webrepl
-
-```python
->>> import webrepl_setup
-WebREPL daemon auto-start status: disabled
-
-Would you like to (E)nable or (D)isable it running on boot?
-(Empty line to quit)
-> E
-To enable WebREPL, you must set password for it
-New password (4-9 chars): mypassword
-Confirm password: mypassword
-Changes will be activated after reboot
-Would you like to reboot now? (y/n)
-```
+[**TRAMMELL document here what to do when you get your board home to get it on your own network**]
 
 ## Is it working?
 
@@ -218,98 +66,85 @@ If you have an ESP with an onboard LED, you can confirm everything is working by
 
 ```python
 >>> from machine import Pin                                                
->>> p = Pin(14,Pin.OUT)                                                      
+>>> p = Pin(0,Pin.OUT)                                                      
 >>> p.on()                                                                     
 >>> p.off()                                                                    
 ```
-
-If you have one with an OLED screen, import the libraries and instantiate an object:
-
-```python
->>> import machine
->>> import ssd1306
->>> i2c = machine.I2C(-1, machine.Pin(5), machine.Pin(4))
->>> oled = ssd1306.SSD1306_I2C(128, 32, i2c)
-```
-
-And here are some basic commands:
-
-```python
->>> oled.fill(1) # fill the screen with white (actually blue)
->>> oled.fill(0) # fill the screen with black
->>> oled.text("hello",0,0,1) # ("text", x, y, black/white)
->>> oled.show() # actually display now
->>> oled.invert() # invert colors
->>> oled.pixel(x, y, c) # address one pixel
-```
-
-Full documentation for the OLED screen is here: [https://docs.micropython.org/en/latest/library/framebuf.html](https://docs.micropython.org/en/latest/library/framebuf.html)
-
-You can always find more info with `dir()` and `help()`:
-
-```python
-dir(oled)
-help(oled)
-```
-
-But for full documentation you'll want to check out the micropython documentation pages online: [http://docs.micropython.org/en/latest/](http://docs.micropython.org/en/latest/)
 
 ## Using webrepl
 
 ### Setup
 
-To view webrepl in your browser go to [http://micropython.trmm.net/](http://micropython.trmm.net/).  **Note:** make sure your browser doesn't correct it to be `https`.  You'll want to use the `http` site or it won't work.  If you run the HTTPS Everywhere extension, disable it for this page.
+To view webrepl in your browser go to the IP address displayed on your ESP board.  So, `http://192.168.0.[number displayed]`.
 
-Replace the IP address in the text box with the one for your ESP board, and hit `Connect`.  If you forgot the IP address, you can run screen again in a terminal, then:
+Pressing enter should give you a prompt for a password.  The password is set to `abcd` by default (this and other boot settings can be changed by editing `boot/boot.py`).
 
-```python
->>> import network
->>> wlan = network.WLAN(network.STA_IF)
->>> wlan.ifconfig()
-```
+Just like in the terminal, `ctrl-c` will stop the current program and the up-arrow key can be used to cycle through previous commands.
 
 You'll see at the bottom it says use `ctrl-A` and `ctrl-V` to paste.  If you want to paste multiple lines of code use `ctrl-E` instead (or upload it as a file).  To quit use `ctrl-a` `ctrl-\`.
 
-If end up with no prompt because code is running, hit `ctrl-C` to quit the `while(true)` loop.
+Sometimes the webrepl stalls, just reload the page and/or unplug and re-plug in your ESP board.
 
 ### Workflow
 
-We want to be able to write, run, debug, write, run, debug... etc.
+Load code onto the board by using the "Send a file" area.
 
-You can write your code on your laptop, then push the file to the board using the "Send a file" area.  To then run the code, type `import [filename without the .py part]`.  So if my file is `led.py`, I want to type `import led`.
-
-You're not limited to one file, you can have several on the board at once.  If you want one to be the code that gets run automatically whenever the board boots, name it `main.py` and run `import main`.  
-
-When you want to resend the file after debugging, you will have to delete the module first (sorry).  You'll need to import `sys` for this:
+Run the code with by importing the file name, minus the `.py` part:
 
 ```python
->>> import sys
->>> del sys.modules['led']
+import led
 ```
 
-Now send the debugged file and import again.  (You only need to import `sys` once.)
+If you want to new a revised version to the board (after fixing a bug), you have to un-import the module and then import it again.  So, after fetching the code with the "Send a file" area, do:
 
-Now we can write, run, and debug over and over again.
+```python
+>>> unimport led
+>>> import led
+```
 
-You can also run small snippets of code directly from the python prompt to test things out if you want.
+You can always test things by running small snippets of code directly from the python prompt in the webrepl if you want.
 
 # MQTT
 
-MQTT is a simple, lightweight messaging protocol.  Clients can both publish to and subscribe to topics.  If I publish to a topic called "talk", everyone who is subscribed to that topic will get the message.  Topics can be anything, and they are hierarchical.  So I can have, for instance:
+You can download MQTT here:
+
+[https://mosquitto.org/](https://mosquitto.org/)
+
+MQTT is a simple, lightweight messaging protocol.  To create an MQTT network, designate one machine as your "broker" (server), and start the broker there:
+
+```bash
+> mosquitto -v
+```
+
+You can then publish (talk) and subscribe (listen), from any device running the client software, with these commands:
+
+```bash
+> mosquitto_sub -h [IP address of broker] -t [topic]
+> mosquitto_pub -h [IP address of broker] -t [topic] -m [message]
+```
+
+For example:
+
+```bash
+> mosquitto_sub -h 192.168.0.10 -t sensors/temp
+> mosquitto_pub -h 192.168.0.10 -t sensors/temp -m 23
+```
+
+Topics can be anything.  They do not have to be created in any special way.  You can use `#` and `*` as wildcards for subscribing to mulitple topics.  For example, all the devices in the kitchen:
 
 ```
-house/kitchen/lights/overhead
-house/kitchen/lights/sink
-house/kitchen/lights/under_counter
-house/kitchen/sensors/temp
-house/kitchen/sensors/humidity
+house/kitchen/#
 ```
 
-Using this example, I could turn on the overhead light in the kitchen by publishing the message `on` to `house/kitchen/lights/overhead`, and I could subscribe to receive messsages from all the sensors in the kitchen by subscribing to `house/kitchen/sensors/#`.  (The `#` here is a wildcard.)
+The lights in every room in the house:
 
-This is a convenient protocol because of its simplicity.  It has far less overhead than http, it's an open standard so it can be freely used and integrated into projects, and there are libraries for several languages (python, javascript, C/C++).
+```
+house/*/light
+```
 
-To use MQTT you need to have one device act as a broker that receives all published messages and sends them out to subscribers.  For an IoT setup you'll probably want this to be a machine that stays on all the time, like a Raspberry Pi.  The most popular broker is Mosquitto.  It's free and open source, and runs on Linux, MacOs, and Windows.
+_Note: You can only use wildcards for subscribing.  You can not publish to more than one topic at a time._
+
+This is a convenient protocol because of its simplicity.  It has less overhead than http and it's an open standard so it can be freely used and integrated into projects.  There are libraries for several languages (python, javascript, C/C++), so you can script interactions within your network with whatever tools you're most comfortable with.
 
 ## Installation
 
@@ -678,6 +513,38 @@ For devices that can be turned on and off, like light bulbs, have two topics:
 
 Have a `my_bulb/state` that only the bulb publishes to.  If other devices, scripts, or dashboard interfaces want to control the bulb, they publish to a `my_bulb/set` topic instead. 
 
+## Using the OLED screen
+
+If you have one with an OLED screen, import the libraries and instantiate an object:
+
+```python
+>>> import machine
+>>> import ssd1306
+>>> i2c = machine.I2C(-1, machine.Pin(5), machine.Pin(4))
+>>> oled = ssd1306.SSD1306_I2C(128, 32, i2c)
+```
+
+And here are some basic commands:
+
+```python
+>>> oled.fill(1) # fill the screen with white (actually blue)
+>>> oled.fill(0) # fill the screen with black
+>>> oled.text("hello",0,0,1) # ("text", x, y, black/white)
+>>> oled.show() # actually display now
+>>> oled.invert() # invert colors
+>>> oled.pixel(x, y, c) # address one pixel
+```
+
+Full documentation for the OLED screen is here: [https://docs.micropython.org/en/latest/library/framebuf.html](https://docs.micropython.org/en/latest/library/framebuf.html)
+
+You can always find more info with `dir()` and `help()`:
+
+```python
+dir(oled)
+help(oled)
+```
+
+But for full documentation you'll want to check out the micropython documentation pages online: [http://docs.micropython.org/en/latest/](http://docs.micropython.org/en/latest/)
 
 # Resources
 
@@ -723,4 +590,25 @@ Adafruit NeoPixel Uberguide
 
 "How Consumer IoT Devices Expose Information"
 [https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information](https://labs.ripe.net/Members/anna_maria_mandalari_2/how-consumer-iot-devices-expose-information)
+
+# What shall we call this?
+
+**CIot**
+	Cloudless Internet of Things (?)
+
+**IoT**
+	Intranet of Things (psuedonymous on Hackaday)
+
+**LANoT**
+	Local Area Network of Things (?)
+
+**LANoH**
+	Local Area Network of Hacky-things (Eliot Williams on Hackaday)
+
+**NoT**
+	Network of Things 
+
+**SNoT**
+	Secure Network of Things
+
 
