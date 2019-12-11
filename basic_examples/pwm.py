@@ -42,7 +42,7 @@ subtopic = {
 
 def handle_msg(topic,msg):
 	# for debugging
-	print("topic:'", topic, "' msg:'", msg, "'")
+	print("topic: ", topic, " msg: ", msg)
 
 	if topic in subtopic:
 		# call function associated with topic, passing message as parameter
