@@ -3,16 +3,24 @@
 import time
 import network
 import urandom
+from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin
 from neopixel import NeoPixel
 
 ########### global variables ##############################
 
-mq = MQTTClient("neo", "192.168.0.10")
-NUM_PIXELS = 7
-# NeoPixel(Pin([pin number], Pin.OUT), [number of pixel])
-np = NeoPixel(Pin(0, Pin.OUT), NUM_PIXELS) 
+unique_ID = hexlify(network.WLAN().config('mac'))
+
+def config  = {
+	'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
+	'mqtt_client': unique_ID, # this device client ID
+	'pin': 0,
+	'num_pixels': 7,
+}
+
+mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
+np = NeoPixel(Pin(config.pin, Pin.OUT), config.num_pixels) 
 
 # red, green, and blue values for the leds
 r, g, b = 0, 0, 0
@@ -20,27 +28,6 @@ pattern_r, pattern_g, pattern_b = 0, 0, 0
 on = False
 pattern_on = False
 counter = []
-
-########### get on the network ############################
-
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
-
-########## while waiting to connect to the network ###############
-
-# keep trying to connect to the wifi until we suceed
-while not wlan.isconnected():
-        np.fill((10,0,0))
-        np.write()
-        time.sleep_ms(200)
-        np.fill((0,0,0))
-        np.write()
-        time.sleep_ms(300)
-np.fill((0,0,10))
-np.write()
-
-wlan.ifconfig()
 
 ######### helper functions ##########################
 
@@ -124,13 +111,13 @@ def set_pattern(msg):
 
 # topics we recognize with their respective functions
 subtopic = {
-	b'led/color': set_color,
-	b'led/set': set_state,
-	b'led/pattern': set_pattern,
+	b'pixels/color': set_color,
+	b'pixels/set': set_state,
+	b'pixels/pattern': set_pattern,
 }
 
 def handle_msg(topic,msg):
-	print("topic:'", topic, "' msg:'", msg, "'")
+	print("topic: ", topic, " msg: ", msg)
 	
 	if topic in subtopic:
 		# call function associated with topic, passing message as parameter
@@ -143,7 +130,7 @@ def handle_msg(topic,msg):
 # start the MQTT client for this microcontroller
 mq.set_callback(handle_msg) # handle_msg is called for ALL messages received
 mq.connect()
-mq.subscribe(b"led/#") # specify the topic to subscribe to (led in this case)
+mq.subscribe(b"pixels/#") # specify the topic to subscribe to (led in this case)
 
 # wait for messages forever
 # when one is received the function we passed to set_callback() will be run

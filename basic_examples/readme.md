@@ -1,8 +1,55 @@
-# Using a button or switch for input
+# Connecting an LED and a button to the ESP board
 
-![wiring diagram](esp-wiring-button.PNG)
+![wiring diagram](wiring-led-button.JPG)
 
-![schematic](button-schematic.png)
+Connect the LED to D3, and connect the button to D7.
+
+In the code D3 is referred to as pin 0, and D7 is pin 13.
+
+## LED code samples
+
+```python
+import time
+from machine import Pin
+
+my_led = Pin(14, Pin.OUT) # which pin your LED is connected to
+
+my_led.on()     # turn it on
+my_led.off()    # turn it off
+
+# to make it blink (put this in a loop)
+my_led.on()         # turn it on
+time.sleep_ms(500)  # wait 1/2 a sec
+my_led.off()        # turn it off
+time.sleep_ms(500)  # wait 1/2 a sec
+
+```
+
+```python
+# example responding to an mqtt message
+def set_state(msg):
+    if msg == b'on':
+        my_led.on()
+    elif msg == b'off':
+        my_led.off()
+```
+
+If you want to dim the LED you can use pwm:
+
+```python
+from machine import Pin,PWM
+
+my_led = Pin(14, Pin.OUT)
+my_led_pwm = PWM(my_led)
+
+# possible values are 0-1023
+my_led_pwm.duty(0)      # off
+my_led_pwm.duty(10)     # dim
+my_led_pwm.duty(512)    # 50% brightness
+my_led_pwm.duty(1023)   # full brightness
+```
+
+## Button info and code samples
 
 If you want to know how the pins in the diagram correspond to the pins on your actual button you can use a multimeter.
 

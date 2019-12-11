@@ -1,26 +1,22 @@
 import time
 import network
+from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin
 from dht import DHT22
 
 ########### global variables ##############################
 
-mq = MQTTClient("dht_sensor", "192.168.0.10")
-dht_sensor = DHT22(Pin(14)) # which pin your NeoPixels are connected to
+unique_ID = hexlify(network.WLAN().config('mac'))
 
-########### get on the network ############################
+def config  = {
+    'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
+    'mqtt_client': unique_ID, # this device client ID
+    'pin': 0, # which pin the temp/humidity sensor is on
+}
 
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
-
-########## while waiting to connect to the network ###############
-
-while not wlan.isconnected():
-	time.sleep_ms(500)
-
-wlan.ifconfig()
+mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
+dht = DHT22(Pin(config.pin)) 
 
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
@@ -32,9 +28,9 @@ mq.connect()
 # Code involving publishing must come after the client is declared
 
 while True:
-	dht_sensor.measure()
-	temp = str(dht_sensor.temperature())
-	humidity = str(dht_sensor.humidity()) 
+	dht.measure()
+	temp = str(dht.temperature())
+	humidity = str(dht.humidity()) 
 	print("temp: " + temp)
 	print("humidity: " + humidity)
 
