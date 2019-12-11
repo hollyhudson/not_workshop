@@ -15,6 +15,7 @@ led = Pin(0, Pin.OUT) # which pin your LED is connected to
 ########## main programming loop ###############
 
 # code for momentary switch behavior, toggle behavior is below
+# Since this is in the top-level while True loop, it's the default behavior
 last_button_value = True # not pressed
 
 while True:
