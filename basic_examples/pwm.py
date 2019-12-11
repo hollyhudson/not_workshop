@@ -1,40 +1,43 @@
 import time
 import network
-import secrets
+from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin,PWM
 
 ########### global variables ##############################
 
-my_led = Pin(14, Pin.OUT) # which pin your LED is connected to
-my_led_pwm = PWM(my_led)
+unique_ID = hexlify(network.WLAN().config('mac'))
 
-########### get on the network ############################
+def config  = {
+    'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
+    'mqtt_client': unique_ID, # this device client ID
+    'led_pin': 0,
+    'button_pin': 13,
+}
 
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(secrets.essid, secrets.passwd) # your local wifi credentials
+mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
+led = Pin(config.led_pin, Pin.OUT)
+button = Pin(config.button_pin, Pin.IN, Pin.PULL_UP)
 
-########## while waiting to connect to the network ###############
-
-while not wlan.isconnected():
-	time.sleep_ms(500)
-
-wlan.ifconfig()
+pwm_led = PWM(led)
 
 ######### turning an LED on and off ##########################
 
 def set_state(msg):
 	if msg == b'on':
-		my_led_pwm.duty(500) # 0-1023, 512 is 50% brightness
+		pwm_led.duty(500) # 0-1023, 512 is 50% brightness
 	elif msg == b'off':
-		my_led_pwm.duty(0) 
+		pwm_led.duty(0) 
+
+def set_dim(msg):
+	pwm_led.duty(msg) # 0-1023, 512 is 50% brightness
 
 ################ MQTT Message switchboard #############################
 
 # topics we recognize with their respective functions
 subtopic = {
-	b'my_led/state': set_state,
+	b'led/set': set_state,
+	b'led/dim': set_state,
 }
 
 def handle_msg(topic,msg):
@@ -50,10 +53,9 @@ def handle_msg(topic,msg):
 ######## MQTT Client: starting, connecting, and subscribing ##########
 
 # start the MQTT client for this microcontroller
-mq = MQTTClient("neo", "192.168.0.10")
 mq.set_callback(handle_msg) # handle_msg() is called for ALL messages received
 mq.connect()
-mq.subscribe(b"my_led/#") 
+mq.subscribe(b"led/#") 
 
 # wait for messages forever
 # when one is received the function we passed to set_callback() will be run
