@@ -8,6 +8,12 @@ import webrepl
 webrepl.start()
 gc.collect()
 
+# Helper to unimport modules, takes a string
+def unimport(mod):
+	import sys
+	if mod in sys.modules.keys():
+		del sys.modules[mod]
+
 # Display the network status on the OLED
 def _wifi_status_display():
 	import network
@@ -26,14 +32,12 @@ def _wifi_status_display():
 
 	# Wait a few seconds for the WiFi to come up,
 	# but don't block forever on it
-	spinner = "\\|/-"
 	print("essid: " + essid, end='')
 	oled.text(essid, 0, 0)
-
-	# mac address is 17 chars with :, just too long
 	oled.text(hexlify(wlan.config('mac')), 0, 24)
-
 	oled.show()
+
+	spinner = "\\|/-"
 
 	for i in range(100):
 		print(".", end='')
@@ -63,3 +67,8 @@ def _wifi_status_display():
 	gc.collect()
 
 _wifi_status_display()
+
+# start the local web server for the webrepl
+# gzip'ed files are served from ./html
+import webserver
+webserver.start()
