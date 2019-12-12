@@ -1,23 +1,18 @@
 import time
-import network
-from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin,PWM
+from config import config
 
 ########### global variables ##############################
 
-unique_ID = hexlify(network.WLAN().config('mac'))
-
-def config  = {
-    'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
-    'mqtt_client': unique_ID, # this device client ID
+pins = {
     'led_pin': 0,
     'button_pin': 13,
 }
 
-mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
-led = Pin(config.led_pin, Pin.OUT)
-button = Pin(config.button_pin, Pin.IN, Pin.PULL_UP)
+mq = MQTTClient(config["mqtt_client"], config["mqtt_broker"])
+led = Pin(pins["led_pin"], Pin.OUT)
+button = Pin(pins["button_pin"], Pin.IN, Pin.PULL_UP)
 
 pwm_led = PWM(led)
 
@@ -30,14 +25,14 @@ def set_state(msg):
 		pwm_led.duty(0) 
 
 def set_dim(msg):
-	pwm_led.duty(msg) # 0-1023, 512 is 50% brightness
+	pwm_led.duty(int(msg)) # 0-1023, 512 is 50% brightness
 
 ################ MQTT Message switchboard #############################
 
 # topics we recognize with their respective functions
 subtopic = {
 	b'led/set': set_state,
-	b'led/dim': set_state,
+	b'led/dim': set_dim,
 }
 
 def handle_msg(topic,msg):

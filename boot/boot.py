@@ -39,7 +39,7 @@ def _wifi_status_display():
 
 	spinner = "\\|/-"
 
-	for i in range(100):
+	for i in range(128):
 		print(".", end='')
 		if wlan.isconnected():
 			break

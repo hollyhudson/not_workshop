@@ -4,16 +4,13 @@
 
 - [STEP ONE](#step-one)
 - [Things on ESP boards](#things-on-esp-boards)
-  - [Is it working?](#is-it-working)
   - [Using webrepl](#using-webrepl)
     - [Setup](#setup)
     - [Workflow](#workflow)
 - [MQTT](#mqtt)
-  - [Installation](#installation)
-  - [Commands](#commands)
   - [Configuration](#configuration)
 - [Node Red](#node-red)
-  - [Installation](#installation-1)
+  - [Installation](#installation)
   - [Node Editor](#node-editor)
   - [APIs](#apis)
   - [Saving your work](#saving-your-work)
@@ -58,32 +55,34 @@ Install mosquitto (the most popular implementation of MQTT).
 You can find detailed information about the board we are using here:
 [https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series](https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series)
 
-[**TRAMMELL document here what to do when you get your board home to get it on your own network**]
-
-## Is it working?
-
-If you have an ESP with an onboard LED, you can confirm everything is working by lighting up an LED:
-
-```python
->>> from machine import Pin                                                
->>> p = Pin(0,Pin.OUT)                                                      
->>> p.on()                                                                     
->>> p.off()                                                                    
-```
+Today the boards have been set up for you.  When you plug them in they will already be on the wifi.  At home you can run `boot/setup.sh` to put your board on your home wifi.  If you buy a different type of ESP board, you can use the instructions in the `webreple-from-scratch.md` file.
 
 ## Using webrepl
 
 ### Setup
 
-To view webrepl in your browser go to the IP address displayed on your ESP board.  So, `http://192.168.0.[number displayed]`.
+To view webrepl in your browser go to the IP address displayed on your ESP board.  
 
-Pressing enter should give you a prompt for a password.  The password is set to `abcd` by default (this and other boot settings can be changed by editing `boot/boot.py`).
+To get a prompt, click in the screen and press enter.  The password is set to `abcd` by default (this and other boot settings can be changed by editing `boot/boot.py`).
 
-Just like in the terminal, `ctrl-c` will stop the current program and the up-arrow key can be used to cycle through previous commands.
+Useful commands:
 
-You'll see at the bottom it says use `ctrl-A` and `ctrl-V` to paste.  If you want to paste multiple lines of code use `ctrl-E` instead (or upload it as a file).  To quit use `ctrl-a` `ctrl-\`.
+**ctrl-C**
+	stop the current program
 
-Sometimes the webrepl stalls, just reload the page and/or unplug and re-plug in your ESP board.
+**ctrl-A ctrl-V**
+	paste one line
+
+**ctrl-E**
+	paste several lines of code
+
+**ctrl-A ctrl-\**
+	quit
+	
+**up arrow**
+	cycle through previous commands
+
+If things stop working, reload the page and/or reset the board.
 
 ### Workflow
 
@@ -95,20 +94,27 @@ Run the code with by importing the file name, minus the `.py` part:
 import led
 ```
 
-If you want to new a revised version to the board (after fixing a bug), you have to un-import the module and then import it again.  So, after fetching the code with the "Send a file" area, do:
+If you want to load a revised version to the board (after fixing a bug), you have to un-import the module and then import it again.  So, after fetching the code with the "Send a file" area, do:
 
 ```python
->>> unimport led
+>>> unimport("led")
 >>> import led
 ```
 
+_The `unimport()` function is a custom tool written for this workshop.  If it's not available, you can `import sys` then run `del sys.modules['led']` instead._
+
 You can always test things by running small snippets of code directly from the python prompt in the webrepl if you want.
 
+For instance, blinking an LED:
+
+```python
+>>> from machine import Pin                                                
+>>> p = Pin(0,Pin.OUT)                                                      
+>>> p.on()                                                                     
+>>> p.off()                                                                    
+```
+
 # MQTT
-
-You can download MQTT here:
-
-[https://mosquitto.org/](https://mosquitto.org/)
 
 MQTT is a simple, lightweight messaging protocol.  To create an MQTT network, designate one machine as your "broker" (server), and start the broker there:
 
@@ -116,7 +122,9 @@ MQTT is a simple, lightweight messaging protocol.  To create an MQTT network, de
 > mosquitto -v
 ```
 
-You can then publish (talk) and subscribe (listen), from any device running the client software, with these commands:
+The `-v` flag puts it in verbose mode.
+
+You can then publish (tell) and subscribe (listen), from any device running the client software, with these commands:
 
 ```bash
 > mosquitto_sub -h [IP address of broker] -t [topic]
@@ -126,11 +134,13 @@ You can then publish (talk) and subscribe (listen), from any device running the 
 For example:
 
 ```bash
-> mosquitto_sub -h 192.168.0.10 -t sensors/temp
 > mosquitto_pub -h 192.168.0.10 -t sensors/temp -m 23
+> mosquitto_sub -h 192.168.0.10 -t sensors/temp
 ```
 
-Topics can be anything.  They do not have to be created in any special way.  You can use `#` and `*` as wildcards for subscribing to mulitple topics.  For example, all the devices in the kitchen:
+Any device can create a topic just by publishing to that topic, and other devics can subscribe to topics that interest them.
+
+You can use `#` and `*` as wildcards for subscribing to mulitple topics.  For example, all the devices in the kitchen:
 
 ```
 house/kitchen/#
@@ -145,36 +155,6 @@ house/*/light
 _Note: You can only use wildcards for subscribing.  You can not publish to more than one topic at a time._
 
 This is a convenient protocol because of its simplicity.  It has less overhead than http and it's an open standard so it can be freely used and integrated into projects.  There are libraries for several languages (python, javascript, C/C++), so you can script interactions within your network with whatever tools you're most comfortable with.
-
-## Installation
-
-For MQTT you'll need a broker to act as the main switchboard for all your messages, and a client running on each of your devices.  For testing purposes it's good to install both a broker and client module on whatever computer you're running the broker on.  You can do this with whatever package manager you use, here are some examples:
-
-Linux/Debian/Ubuntu:
-```bash
-> sudo apt install mosquitto mosquitto-clients
-```
-
-MacOS:
-```bash
-> sudo port install mosquitto mosquitto-clients
-```
-
-or
-
-```bash
-> brew install mosquitto mosquitto-clients
-```
-
-Here's the Mosquitto website: [https://mosquitto.org/](https://mosquitto.org/), if you want to download it directly or build it from source.
-
-## Commands
-
-To start a broker (in verbose mode):
-
-```bash
-> mosquitto -v
-```
 
 The basic format for subscribing to a topic, and for publishing a message to that topic:
 
@@ -219,7 +199,9 @@ You can restrict who can publish and subscribe to messages by setting client ID 
 
 ![example flow for Node Red](images/nodered-example-flow.png)
 
-If you do a lot of programming, you're probably already thinking of ways to script automations for your devices with MQTT.  But if you don't want to write a lot of code, or want to make it possible for non-programmers in your household or workspace to edit automations, Node Red is a good option.  Most of the interface is boxes (nodes) that you "wire" together to pass messages from one component to another, with some javascript thrown in where necessary to customise the logic of those automations.  Plus you can easily create a web-based dashboard of buttons and switches that folks can access from their laptops and smartphones.
+You'll probably want one central hub for all of your device information and automation logic to reside so that there is one central place to go when you want to add a feature or if something breaks.  
+
+You could script things together with your favorite programming language, but Node Red provides a convenient unified interface for both your DIY things and your consumer IoT devices.  It's a low-code environment, so it will be easier for members of your household who do not code to understand and tweak.  In addition it provides a browser-based dashboard that you can access from laptops and phones.
 
 ![example dashboard for Node Red](images/nodered-example-dashboard.png)
 

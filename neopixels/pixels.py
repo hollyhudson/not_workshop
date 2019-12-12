@@ -1,8 +1,9 @@
-# Template file for NeoPixel patterns
+# Template file for NeoPixels
 
 import time
 import network
 import urandom
+from config import config
 from ubinascii import hexlify
 from umqtt.simple import MQTTClient
 from machine import Pin
@@ -10,17 +11,13 @@ from neopixel import NeoPixel
 
 ########### global variables ##############################
 
-unique_ID = hexlify(network.WLAN().config('mac'))
-
-def config  = {
-	'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
-	'mqtt_client': unique_ID, # this device client ID
-	'pin': 0,
+pins  = {
+	'pixel': 0,
 	'num_pixels': 7,
 }
 
-mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
-np = NeoPixel(Pin(config.pin, Pin.OUT), config.num_pixels) 
+mq = MQTTClient(config["mqtt_client"], config["mqtt_broker"])
+np = NeoPixel(Pin(pins["pixel"], Pin.OUT), pins["num_pixels"])
 
 # red, green, and blue values for the leds
 r, g, b = 0, 0, 0

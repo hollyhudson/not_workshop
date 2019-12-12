@@ -1,23 +1,18 @@
 import time
-import network
-from ubinascii import hexlify
 from umqtt.simple import MQTTClient
+from config import config
 from machine import Pin
 
 ########### global variables ##############################
 
-unique_ID = hexlify(network.WLAN().config('mac'))
-
-def config  = {
-    'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
-    'mqtt_client': unique_ID, # this device client ID
-    'led_pin': 0,
-    'button_pin': 13,
+pins = {
+	'led_pin': 0,
+	'button_pin': 13,
 }
 
-mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
-led = Pin(config.led_pin, Pin.OUT)
-button = Pin(config.button_pin, Pin.IN, Pin.PULL_UP) 
+mq = MQTTClient(config["mqtt_client"], config["mqtt_broker"])
+led = Pin(pins["led_pin"], Pin.OUT)
+button = Pin(pins["button_pin"], Pin.IN, Pin.PULL_UP) 
 
 ######### turn LED on and off based on msg ##########################
 
@@ -25,10 +20,11 @@ def handle_msg(topic,msg):
 	# for debugging
 	print("topic: ", topic, " msg: ", msg)
 
-    if msg == b'on':
-        led.on()
-    elif msg == b'off':
-        led.off()
+	if msg == b'on':
+		led.on()
+	elif msg == b'off':
+		print("off: ", topic, " msg: ", msg)
+		led.off()
 
 
 ######## MQTT Client: starting and connecting ##########
@@ -45,6 +41,8 @@ mq.subscribe(b'led/#')
 last_button_value = True # not pressed
 
 while True:
+	mq.check_msg()
+
 	button_value = button.value()
 
 	if last_button_value == button_value:

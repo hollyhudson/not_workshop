@@ -2,6 +2,7 @@ import time
 import network
 from ubinascii import hexlify
 from umqtt.simple import MQTTClient
+from config import config
 from machine import Pin
 from dht import DHT22
 
@@ -9,14 +10,12 @@ from dht import DHT22
 
 unique_ID = hexlify(network.WLAN().config('mac'))
 
-def config  = {
-    'mqtt_broker': '192.168.0.12',  # central server for our mqtt network
-    'mqtt_client': unique_ID, # this device client ID
-    'pin': 0, # which pin the temp/humidity sensor is on
+pins = {
+    'sensor': 0, # which pin the temp/humidity sensor is on
 }
 
-mq = MQTTClient(config.mqtt_client, config.mqtt_broker)
-dht = DHT22(Pin(config.pin)) 
+mq = MQTTClient(config["mqtt_client"], config["mqtt_broker"])
+dht = DHT22(Pin(pins["sensor"])) 
 
 ######## MQTT Client: starting, connecting, and subscribing ##########
 

@@ -3,6 +3,7 @@
 # so that the webrepl can be self hosted.
 #
 import re
+import gc
 
 try:
 	import usocket as socket
