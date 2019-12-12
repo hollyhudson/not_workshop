@@ -14,22 +14,15 @@
   - [Node Editor](#node-editor)
   - [APIs](#apis)
   - [Saving your work](#saving-your-work)
-- [SNoT - Secure Network of Things](#snot---secure-network-of-things)
-  - [Securing MQTT](#securing-mqtt)
-  - [Securing Node Red](#securing-node-red)
-- [Troubleshooting](#troubleshooting)
-- [To Do](#to-do)
-  - [Document the QOS settings for mqtt](#document-the-qos-settings-for-mqtt)
-- [Setting up a Raspberry Pi](#setting-up-a-raspberry-pi)
-  - [Basic Setup](#basic-setup)
 - [Best Practices](#best-practices)
   - [Circuits](#circuits)
   - [MQTT](#mqtt-1)
-  - [Using the OLED screen](#using-the-oled-screen)
+  - [In general](#in-general)
+- [Using the OLED screen](#using-the-oled-screen)
 - [Resources](#resources)
   - [Hardware](#hardware)
   - [Software](#software)
-  - [Products](#products)
+  - [Products/Inspiration](#productsinspiration)
   - [Tutorials and Talks](#tutorials-and-talks)
   - [Readings](#readings)
 - [What shall we call this?](#what-shall-we-call-this)
@@ -40,13 +33,13 @@
 
 Install mosquitto (the most popular implementation of MQTT).
 
-**Linux**
+**For Linux**
  	It's probably already there.  Run `which mosquitto` to check.
 
-**Mac**
-	Use your favorite package manager to install to install `mosquitto` and `mosquitto-clients`.  If those words didn't mean anything to you, congratulations, you will now gain a favorite package manager.  Homebrew is the most popular these days: [https://brew.sh/](https://brew.sh/), but I prefer MacPorts: [https://www.macports.org/](https://www.macports.org/).  Install one and type `brew install mosquitto mosquitto-clients` or `port install mosquitto mosquitto-clients`.  If it fails, take off the `mosquitto-clients` part and try again.
+**For Mac**
+	Use your favorite package manager to install to install `mosquitto` and `mosquitto-clients`.  If you don't have a favorite package manager, a lot of people like homebrew: [https://brew.sh/](https://brew.sh/), but I prefer MacPorts: [https://www.macports.org/](https://www.macports.org/).  Install one and type `brew install mosquitto mosquitto-clients` or `port install mosquitto mosquitto-clients`.  If it fails, take off the `mosquitto-clients` part and try again.
 
-**Windows**
+**For Windows**
 	The website has a download option: [https://mosquitto.org/download/](https://mosquitto.org/download/).
 
 
@@ -76,7 +69,7 @@ Useful commands:
 **ctrl-E**
 	paste several lines of code
 
-**ctrl-A ctrl-\**
+**ctrl-A ctrl-\\**
 	quit
 	
 **up arrow**
@@ -116,7 +109,7 @@ For instance, blinking an LED:
 
 # MQTT
 
-MQTT is a simple, lightweight messaging protocol.  To create an MQTT network, designate one machine as your "broker" (server), and start the broker there:
+MQTT is a simple, lightweight messaging protocol.  To create an MQTT network, designate one machine as your "broker" (server), and start the broker on that machine:
 
 ```bash
 > mosquitto -v
@@ -138,9 +131,9 @@ For example:
 > mosquitto_sub -h 192.168.0.10 -t sensors/temp
 ```
 
-Any device can create a topic just by publishing to that topic, and other devics can subscribe to topics that interest them.
+Any device can create a topic just by publishing to that topic, and other devices can subscribe to topics that interest them.
 
-You can use `#` and `*` as wildcards for subscribing to mulitple topics.  For example, all the devices in the kitchen:
+You can use `#` and `+` as wildcards for subscribing to mulitple topics.  For example, all the devices in the kitchen:
 
 ```
 house/kitchen/#
@@ -149,37 +142,12 @@ house/kitchen/#
 The lights in every room in the house:
 
 ```
-house/*/light
+house/+/light
 ```
 
 _Note: You can only use wildcards for subscribing.  You can not publish to more than one topic at a time._
 
 This is a convenient protocol because of its simplicity.  It has less overhead than http and it's an open standard so it can be freely used and integrated into projects.  There are libraries for several languages (python, javascript, C/C++), so you can script interactions within your network with whatever tools you're most comfortable with.
-
-The basic format for subscribing to a topic, and for publishing a message to that topic:
-
-```bash
-> mosquitto_sub -h [host ip] -t [topic]
-> mosquitto_pub -h [host ip] -t [topic] -m [message]
-```
-
-example:
-
-```bash
-> mosquitto_sub -h 129.168.0.23 -t led 
-> mosquitto_pub -h 129.168.0.23 -t led -m 255,0,255
-```
-
-You can use `#` and `+` as wildcards to susbscribe to more than one topic.  You cannot use wildcards to publish to more than one topic.
-
-**living_room/\#**
-	all topics for all devices in your living room (you have to escape the `#` character on the command line)
-
-**living_room/+/bulb**
-	all the lightbulbs in your living room
-
-**\#**
-	subscribe to all messages
 
 ## Configuration
 
@@ -228,12 +196,6 @@ Note that node red runs on port 1880 by default (MQTT runs on port 1883).
 
 ## Node Editor
 
-For a basic interaction, find a "slider" node and plug it into a "debug" node.  You might have to install the dashboard module first:
-
-Hamburger menu --> Manage Palette --> install node-red-dashboard
-
-View the dashboard by going to the url of your palette with a `/ui` added to the end (or click the dashboard icon in the node editor).
-
 **In order for changes you made in the node editor to take effect, you have to click "Deploy".**  You will be clicking "Deploy" a lot.
 
 Node Red's basic function is to send messages from one thing to another.  While these messages can enter Node Red in any number of formats (http, mqtt, html, xml, etc.) once inside Node Red they are converted to and passed around as json objects.  Here is the basic structure:
@@ -245,7 +207,7 @@ Node Red's basic function is to send messages from one thing to another.  While 
 }
 ```
 
-You can modify messages and automate decisions based on messages by using javascript with the "function" node.  When you open it you'll see `return msg;` in the textbox.  You just add your code above that.  The incoming message object is stored in the `msg` variable, so if you do nothing the message will pass through the node unchanged.
+You can modify messages and automate decisions based on messages by using the available nodes, and when you want to customize behavior even further you can use a "function" node.  Inside the function node you can modify incoming messages with javascript, and then "return" them to the following node.  When you open it you'll see `return msg;` in the textbox.  You just add your code above that.  The incoming message object is stored in the `msg` variable, so if you do nothing the message will pass through the node unchanged.
 
 But you probably want to alter the message.  Here's what you need to know.  The actual content of the message is stored in the "payload" property of the message object:
 
@@ -268,42 +230,11 @@ The payload can be a string, as above, a number (don't use quotes), a boolean (t
 ```javascript
 msg.payload = {
 	"brightness": 150,
-	"mired": 400
+	"color_temp": 400
 }	
 ```
 
-Since you can write javascript in the function node, you can add logic.  For instance, the color spectrum Ikea smart bulbs use color names instead of numerical values.  I wanted to be able to use a slider on the dashboard to change the color, and the slider would just return numbers, so I needed to convert those numbers into colors to actually craft a message that the Ikea device would understand.  Here's the code:
-
-```javascript
-var colors = [
-	"dark peach",
-	"warm amber",
-	"candlelight",
-	"warm",
-	"sunrise",
-	"normal",
-	"lime",
-	"yellow",
-	"pink",
-	"saturated pink",
-	"light purple",
-	"saturated purple",
-	"blue",
-	"light blue",
-	"cold sky",
-	"cool daylight",
-	"focus"];
-    
-index = msg.payload; // incoming msg, which is an int
-color_name = colors[index];
-msg.payload = {
-    "color": color_name
-};
-
-return msg;
-```
-
-You'll probably want to turn a bunch of lights on or off at once, but MQTT doesn't let you publish to multiple topics at the same time.  In Node Red you can solve this problem by creating an array of messages in a function node:
+Since you can write javascript in the function node, you can add logic.  For example, you'll probably want to turn a bunch of lights on or off at once, but MQTT doesn't let you publish to multiple topics at the same time.  In Node Red you can solve this problem by creating an array of messages in a function node:
 
 ```javascript
 var incoming_payload = msg.payload; // will be "on" or "off"
@@ -360,119 +291,9 @@ return new_msg;
 
 **There is no undo in Node Red.**
 
-Your current flow setup is stored in `~/.node-red/flows_[something].json`.  
-It's a good idea to make a copy of this file frequently for back
-up.  If you put it in version control on github, make sure you
-haven't included any secret authentication information in any of
-the flows.
+Your current flow setup is stored in `~/.node-red/flows_[something].json`.  It's a good idea to make a copy of this file frequently for back up.  If you put it in version control on github, make sure you haven't included any secret authentication information in any of the flows.
 
 Since the structure of the flows is stored as json, you can share your flows, and install other people's flows, by sharing the json description.
-
-# SNoT - Secure Network of Things
-
-In general, securing the system is beyond the scope of this workshop.  The design presented here is not exposed to the internet, so in order to control devices an attacker would have to log onto your home wifi, which provides some basic protection for most threat models (ie., if you are not specifically a target of someone).
-
-Here are some additional protections you can add that are not too much trouble.
-
-## Securing MQTT
-
-In the `mosquitto.conf` file (how to find this is in the main MQTT section) there's a section on access control.  You can set usernames an passwords for your clients, and you can restrict who can subscribe and publish based on topic and/or client ID.
-
-## Securing Node Red
-
-# Troubleshooting
-
-**Can't connect to micropython.org/webrepl**
-
-Try the `http` site and _not_ the `https` site.  If you try to access from the `https` site browsers may refuse to serve the "insecure content" from the websocket.
-
-# To Do
-
-## Document the QOS settings for mqtt
-
-The broker will hold the last message sent, and if you run
-`mq.wait_msg()` the board will listen for a message again and get
-whatever was sent in the interim (with the current qos configuration,
-this can be changed).
-
-# Setting up a Raspberry Pi
-
-## Basic Setup
-
-These instructions are for a headless (no monitor) Raspberry Pi W0.
-
-Raspberry Pi's keep their operating system on an SD card, so the first thing we have to do is flash a card with the appropriate operating system.
-
-First download the "lite" version of the most recent Raspbian version here: [https://www.raspberrypi.org/downloads/raspbian/](https://www.raspberrypi.org/downloads/raspbian/)
-
-We'll use Etcher for flashing the OS onto the Pi, so download and install it: [https://www.balena.io/etcher/](https://www.balena.io/etcher/)
-
-(So, I guess if you're running Catalina find a friend with Linux to flash your SD card because that seems to be broken in Catalina right now?)
-
-Now, we'll need to get the wifi credentials onto the board since we're not connecting it to a monitor.  Instructions for that are here: [https://www.raspberrypi.org/documentation/configuration/wireless/headless.md](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md)
-
-Now you need to find the ip address of your Raspberry Pi.  `nmap` is good for this. 
-
-[...some steps skipped...]
-
-Having just set up your pi, it's in a bit of a dangerous state since remote login is enabled and the default username and password are `pi` and `raspberry`.  Log in and create a .ssh directory in pi's home directory:
-
-```
-holly@geode:~ > ssh pi@192.168.0.39
-pi@raspberrypi:~ $ mkdir .ssh
-```
-
-From your local machine, transfer your public ssh key to the pi:
-
-```
-holly@geode:~/.ssh >  scp id_rsa.pub pi@192.168.0.39:/home/pi/.ssh/authorized_keys
-pi@192.168.0.39's password:
-id_rsa.pub                                    100%  399    71.6KB/s   00:00
-```
-
-Now, before you turn off password login, make sure you can successfully log into the pi.  So exit, and ssh back in.
-
-```
-pi@raspberrypi:~/.ssh $ exit
-logout
-Connection to 192.168.0.39 closed.
-holly@geode:~ >  ssh pi@192.168.0.39
-Enter passphrase for key '/Users/holly/.ssh/id_rsa':
-Linux raspberrypi 4.19.75+ #1270 Tue Sep 24 18:38:54 BST 2019 armv6l
-
-The programs included with the Debian GNU/Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc//copyright.
-
-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
-permitted by applicable law.
-Last login: Sat Nov 23 15:09:38 2019 from 192.168.0.10
-
-SSH is enabled and the default password for the 'pi' user has not been changed.
-This is a security risk - please login as the 'pi' user and type 'passwd' to set a new password.
-
-pi@raspberrypi:~ $
-```
-
-and turn off password login by editing `/etc/ssh/sshd_config`, searching for the line `#PasswordAuthentication yes` and changing the yes to no and uncomment the line (remove the `#`).
-
-To make the changes take effect, restart `ssh` with:
-
-```
-pi@raspberrypi:~ $ sudo /etc/init.d/ssh restart
-[ ok ] Restarting ssh (via systemctl): ssh.service.
-```
-
-or just reboot the pi.
-
-You'll probably want to change the hostname of your pi.  Edit two files, `/etc/hosts` and `/etc/hostname`, replacing all instance of "raspberrypi" with whatever you want the hostname to be, then reboot the pi (`sudo reboot`).
-
-Now let's get the os up to date:
-
-```
-pi@raspberrypi:~ $ sudo apt update
-pi@raspberrypi:~ $ sudo apt upgrade
-```
 
 # Best Practices
 
@@ -486,16 +307,25 @@ pi@raspberrypi:~ $ sudo apt upgrade
 
 Connect in this order:
 	1. ground
-	1. power
-	1. data
+	2. power
+	3. data
 
 ## MQTT
 
-For devices that can be turned on and off, like light bulbs, have two topics:
+For devices that can be turned on and off, like light bulbs, have two topics, "state" and "set".  Only bulbs publish to "state" (am I on or off), and they get their commands by subscribing to the "set" topic.
 
-Have a `my_bulb/state` that only the bulb publishes to.  If other devices, scripts, or dashboard interfaces want to control the bulb, they publish to a `my_bulb/set` topic instead. 
+Have your devices tell you who they are and where they are every time they send a message.  This makes it easy to locate misbehaving devices if your system grows large.  You can do this with topics, for example:
 
-## Using the OLED screen
+**helpful** - bedroom/light/multicolor/nightstand
+**not helpful** - light23
+
+## In general
+
+Have a central brain, with dumb devices.
+
+It's best to only have the barest minimum of code running on each device.  Put all your control logic and automation code on your main central machine, either in something like Node Red, or in scripts, as you prefer.  When things break this will make it easy to find the problem, and when you want to add features you'll know exactly where to put the code.
+
+# Using the OLED screen
 
 If you have one with an OLED screen, import the libraries and instantiate an object:
 
@@ -546,27 +376,21 @@ MQTT
 Node Red, "low code" programming for networked things
 [https://nodered.org/](https://nodered.org/)
 
-Snips, private-by-design voice assistant
-[https://snips.ai/](https://snips.ai/)
-
-Mozilla's WebThings:
-[https://iot.mozilla.org/](https://iot.mozilla.org/)
-
-## Products
+## Products/Inspiration
 
 Candle, privacy-friendly smarthome
 [https://www.candlesmarthome.com/](https://www.candlesmarthome.com/)
 
 ## Tutorials and Talks
 
-Cloning a Raspberry Pi
-[https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image](https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image)
-
 Hackaday talk about cloudless IoT
 [https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/](https://hackaday.com/2019/11/07/found-footage-elliot-williams-talks-nexus-technologies/)
 
 Adafruit NeoPixel Uberguide
 [https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/the-magic-of-neopixels)
+
+Cloning a Raspberry Pi
+[https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image](https://raspberrypi.stackexchange.com/questions/93315/cloning-the-raspberry-pi-sd-card-as-a-balenaetcher-ready-instal-able-image)
 
 ## Readings
 
